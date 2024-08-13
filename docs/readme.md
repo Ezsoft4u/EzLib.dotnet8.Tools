@@ -1,6 +1,6 @@
-# EzLib
+# EzLib.dotnet8.Tools
 
-EzLib 是一個基於 .NET 的庫，提供了一些常用的功能和工具。
+EzLib.dotnet8.Tools 是一個基於 .NET 8 的庫，提供了一些常用的功能和工具。
 
 ## 目錄
 
@@ -15,7 +15,7 @@ EzLib 是一個基於 .NET 的庫，提供了一些常用的功能和工具。
 你可以通過 NuGet 安裝 EzLib：
 
 ```bash
-	dotnet add package EzLib 
+dotnet add package EzLib.dotnet8.Tools 
 ```	
 	
 或者在你的 `.csproj` 文件中添加以下引用
