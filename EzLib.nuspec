@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>EzLib.dotnet8.Tools</id>
+    <version>1.0.0</version>
+    <title>EzLib .Net8 Library</title>
+    <authors>MarkChu</authors>
+    <owners>Ezsoft4u Studio Inc.</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>EzLib is a .NET library for various utilities and functionalities.</description>
+    <releaseNotes>Initial release of EzLib.</releaseNotes>
+    <copyright>Copyright © 2024</copyright>
+    <license type="expression">MIT</license>
+    <tags>utility library .NET</tags>
+    <readme>docs\readme.md</readme>
+    <dependencies>
+      <!-- 針對 .NET 8 的依賴項 -->
+      <group targetFramework="net8.0">
+        <dependency id="Microsoft.AspNetCore.Http.Features" version="5.0.17" />
+        <dependency id="Serilog" version="4.0.1" />
+        <dependency id="Serilog.AspNetCore" version="8.0.2" />
+        <dependency id="Serilog.Sinks.Console" version="6.0.0" />
+        <dependency id="Serilog.Sinks.File" version="6.0.0" />
+        <dependency id="Serilog.Sinks.MSSqlServer" version="6.6.1" />
+        <dependency id="MimeKit" version="4.7.1" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Release\net8.0\EzLib.dll" target="lib\net8.0\" />
+    <file src="bin\Release\net8.0\EzLib.pdb" target="lib\net8.0\" />
+    <file src="docs\readme.md" target="docs\" />
+  </files>
+</package>
