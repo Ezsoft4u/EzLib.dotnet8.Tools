@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>EzLib.dotnet8.Tools</id>
-    <version>1.0.0</version>
+    <version>1.0.2</version>
     <title>EzLib .Net8 Library</title>
     <authors>MarkChu</authors>
     <owners>Ezsoft4u Studio Inc.</owners>
@@ -22,6 +22,7 @@
         <dependency id="Serilog.Sinks.Console" version="6.0.0" />
         <dependency id="Serilog.Sinks.File" version="6.0.0" />
         <dependency id="Serilog.Sinks.MSSqlServer" version="6.6.1" />
+        <dependency id="MailKit" version="4.7.1.1" />
         <dependency id="MimeKit" version="4.7.1" />
       </group>
     </dependencies>
