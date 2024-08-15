@@ -28,8 +28,9 @@ dotnet add package EzLib.dotnet8.Tools
 ### 設定 Serilog
 
 ```csharp
+using Serilog; 
+using EzLib;
 
-using Serilog; using EzLib;
 var logConfig = new LoggerConfiguration() 
 	.WriteTo.Console() 
 	.WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day);
