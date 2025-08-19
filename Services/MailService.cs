@@ -3,6 +3,7 @@ using MailKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
+using Serilog; // 新增：Serilog
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,9 +16,11 @@ namespace EzLib.Services
     public class MailService : IMailService
     {
         private readonly MailSettings _mailSettings;
+        private readonly ILogger _logger; // Serilog logger
         public MailService(MailSettings mailSettings)
         {
-            _mailSettings = mailSettings;
+            _mailSettings = mailSettings ?? throw new ArgumentNullException(nameof(mailSettings));
+            _logger = Log.ForContext<MailService>();
         }
 
         public async Task<MailResult> SendEmailAsync(MailRequest mailRequest)
@@ -26,49 +29,86 @@ namespace EzLib.Services
 
             try
             {
+                if (mailRequest == null)
+                    throw new ArgumentNullException(nameof(mailRequest));
+                if (string.IsNullOrWhiteSpace(mailRequest.ToEmail))
+                    throw new ArgumentException("ToEmail 不可為空", nameof(mailRequest.ToEmail));
+
+                LogDebug("開始建立郵件內容...");
                 var email = CreateEmailMessage(mailRequest);
                 var sslOption = GetSecureSocketOptions(_mailSettings.SSL);
-                var IsAuth = _mailSettings.IsAuth;
+                var isAuth = _mailSettings.IsAuth;
+
+                LogDebug($"SMTP 設定 Host={_mailSettings.Host}, Port={_mailSettings.Port}, SSL={_mailSettings.SSL}, Auth={isAuth}");
+
+                using var smtp = _mailSettings.Debug
+                    ? new SmtpClient(new ProtocolLogger(Console.OpenStandardOutput()))
+                    : new SmtpClient();
 
                 if (_mailSettings.Debug)
                 {
-                    using var smtp = new SmtpClient(new ProtocolLogger(Console.OpenStandardOutput()));
+                    // 忽略憑證（僅 Debug）
                     smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
                     smtp.CheckCertificateRevocation = false;
-                    await SendEmailAsync(smtp, email, sslOption, IsAuth);
                 }
-                else
-                {
-                    using var smtp = new SmtpClient();
-                    await SendEmailAsync(smtp, email, sslOption, IsAuth);
-                }
+
+                await SendEmailAsync(smtp, email, sslOption, isAuth);
 
                 result.IsSuccess = true;
                 result.Message = "Email sent successfully.";
+                LogDebug("郵件發送完成");
             }
             catch (Exception ex)
             {
                 result.IsSuccess = false;
-                result.Message = ex.Message;
+                result.Message = BuildErrorMessage(ex);
+                LogError("郵件發送失敗", ex);
             }
 
             return result;
         }
+
         /// <summary>
-        /// 創建 MimeMessage 物件，並設置發件人、收件人、主題和內容。
+        /// 建立 MimeMessage (支援多收件人/CC/BCC，使用逗號或分號分隔)
         /// </summary>
-        /// <param name="mailRequest"></param>
-        /// <returns></returns>
         private MimeMessage CreateEmailMessage(MailRequest mailRequest)
         {
             var email = new MimeMessage();
-            // 使用 req.From 或 _mailSettings.Mail
-            email.Sender = MailboxAddress.Parse(string.IsNullOrEmpty(mailRequest.From) ? _mailSettings.Mail : mailRequest.From);
+
+            // From / Sender
+            var fromAddress = string.IsNullOrWhiteSpace(mailRequest.From) ? _mailSettings.Mail : mailRequest.From.Trim();
+            email.Sender = MailboxAddress.Parse(fromAddress);
+            email.From.Add(MailboxAddress.Parse(fromAddress));
+
+            // To
+            foreach (var addr in SplitAddresses(mailRequest.ToEmail))
+            {
+                email.To.Add(MailboxAddress.Parse(addr));
+            }
+
+            // CC
+            if (!string.IsNullOrWhiteSpace(mailRequest.Cc))
+            {
+                foreach (var addr in SplitAddresses(mailRequest.Cc))
+                {
+                    email.Cc.Add(MailboxAddress.Parse(addr));
+                }
+            }
+
+            // BCC
+            if (!string.IsNullOrWhiteSpace(mailRequest.Bcc))
+            {
+                foreach (var addr in SplitAddresses(mailRequest.Bcc))
+                {
+                    email.Bcc.Add(MailboxAddress.Parse(addr));
+                }
+            }
 
 #if DEBUG
+            // 在 DEBUG 編譯時，強制覆蓋收件人（避免意外發送到正式人員）
+            LogDebug("DEBUG 組態下覆寫收件人 -> markchu929@gmail.com");
+            email.To.Clear();
             email.To.Add(MailboxAddress.Parse("markchu929@gmail.com"));
-#else
-            email.To.Add(MailboxAddress.Parse(mailRequest.ToEmail));
 #endif
 
             email.Subject = string.IsNullOrEmpty(mailRequest.Subject)
@@ -78,61 +118,102 @@ namespace EzLib.Services
             var builder = new BodyBuilder();
             if (mailRequest.IsHtml == true)
             {
-                builder.HtmlBody = mailRequest.Body;
+                builder.HtmlBody = mailRequest.Body ?? string.Empty;
             }
-            else 
-            { 
-                builder.TextBody = mailRequest.Body; 
+            else
+            {
+                builder.TextBody = mailRequest.Body ?? string.Empty;
             }
 
-            if (mailRequest.Attachments != null)
+            // Attachments
+            if (mailRequest.Attachments != null && mailRequest.Attachments.Count > 0)
             {
-                foreach (var file in mailRequest.Attachments)
+                foreach (var file in mailRequest.Attachments.Where(f => f != null && f.Length > 0))
                 {
-                    if (file.Length > 0)
-                    {
-                        using var ms = new MemoryStream();
-                        file.CopyTo(ms);
-                        builder.Attachments.Add(file.FileName, ms.ToArray(), ContentType.Parse(file.ContentType));
-                    }
+                    using var ms = new MemoryStream();
+                    file.CopyTo(ms);
+                    builder.Attachments.Add(file.FileName, ms.ToArray(), ContentType.Parse(file.ContentType));
+                    LogDebug($"加入附件: {file.FileName} ({file.Length} bytes)");
                 }
             }
 
             email.Body = builder.ToMessageBody();
+
+            LogDebug($"郵件建立完成 -> To: {string.Join(';', email.To.Select(a => a.ToString()))}, Subject: {email.Subject}");
             return email;
         }
 
-
-        private SecureSocketOptions GetSecureSocketOptions(int sslOption)
+        private SecureSocketOptions GetSecureSocketOptions(int sslOption) => sslOption switch
         {
-            return sslOption switch
-            {
-                0 => SecureSocketOptions.None,
-                1 => SecureSocketOptions.Auto,
-                2 => SecureSocketOptions.SslOnConnect,
-                3 => SecureSocketOptions.StartTls,
-                4 => SecureSocketOptions.StartTlsWhenAvailable,
-                _ => SecureSocketOptions.None,
-            };
-        }
+            0 => SecureSocketOptions.None,
+            1 => SecureSocketOptions.Auto,
+            2 => SecureSocketOptions.SslOnConnect,
+            3 => SecureSocketOptions.StartTls,
+            4 => SecureSocketOptions.StartTlsWhenAvailable,
+            _ => SecureSocketOptions.None,
+        };
 
-        private async Task SendEmailAsync(SmtpClient smtp, MimeMessage email, SecureSocketOptions sslOption, bool IsAuth)
+        private async Task SendEmailAsync(SmtpClient smtp, MimeMessage email, SecureSocketOptions sslOption, bool isAuth)
         {
             try
             {
+                LogDebug("連線到 SMTP 伺服器...");
                 await smtp.ConnectAsync(_mailSettings.Host, _mailSettings.Port, sslOption);
-                if (IsAuth) 
+                LogDebug("已連線");
+
+                if (isAuth)
                 {
+                    LogDebug("進行身份驗證...");
                     await smtp.AuthenticateAsync(_mailSettings.Mail, _mailSettings.Password);
+                    LogDebug("身份驗證成功");
                 }
+
+                LogDebug("傳送郵件中...");
                 await smtp.SendAsync(email);
+                LogDebug("郵件已送出，斷線中...");
                 await smtp.DisconnectAsync(true);
-                // Trace.WriteLine("Email sent successfully.");
+                LogDebug("SMTP 連線關閉");
             }
             catch (Exception)
             {
-                // Trace.WriteLine($"Failed to send email: {ex.Message}");
-                throw; // 重新拋出異常以便上層處理
+                throw; // 保持往上層處理
+            }
+        }
+
+        private static IEnumerable<string> SplitAddresses(string addresses)
+        {
+            return addresses
+                .Split(new[] { ';', ',', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(a => a.Trim())
+                .Where(a => !string.IsNullOrWhiteSpace(a));
+        }
+
+        private string BuildErrorMessage(Exception ex)
+        {
+            var parts = new List<string> { ex.GetType().Name, ex.Message };
+            if (ex.InnerException != null)
+            {
+                parts.Add($"Inner: {ex.InnerException.GetType().Name} {ex.InnerException.Message}");
+            }
+            return string.Join(" | ", parts);
+        }
+
+        private void LogDebug(string message)
+        {
+            if (!_mailSettings.Debug) return;
+            _logger.Debug("{Message}", message);
+        }
+
+        private void LogError(string message, Exception ex)
+        {
+            if (!_mailSettings.Debug)
+            {
+                // 即使 Debug=false 仍要記錄錯誤於 Error 層級給集中式日誌
+                _logger.Error(ex, "{Message}", message);
+            }
+            else
+            {
+                _logger.Error(ex, "{Message}", message);
             }
         }
     }

@@ -68,5 +68,7 @@ namespace EzLib.Models
         public string? Body { get; set; }
         public bool? IsHtml { get; set; }
         public List<IFormFile>? Attachments { get; set; }
+        public string? Cc { get; set; } = string.Empty;
+        public string? Bcc { get; set; } = string.Empty;
     }
 }

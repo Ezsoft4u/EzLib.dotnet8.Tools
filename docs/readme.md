@@ -1,66 +1,162 @@
 # EzLib.dotnet8.Tools
 
-EzLib.dotnet8.Tools æ˜¯ä¸€å€‹åŸºæ–¼ .NET 8 çš„åº«ï¼Œæä¾›äº†ä¸€äº›å¸¸ç”¨çš„åŠŸèƒ½å’Œå·¥å…·ã€‚
+EzLib.dotnet8.Tools ¬O¤@­Ó°ò©ó .NET 8 ªº±`¥Î¤u¨ãµ{¦¡®w¡A¾ã¦X¡G
+- Serilog ¤é»x«Ê¸Ë»P§Ö³t±Ò¥Î
+- ¶l¥ó±H°e (MailKit / MimeKit)
+- Â²°TªA°ÈÂX¥R (¤¤µØ¹q«H IMSP ¥­¥x¥Ü¨Ò)
 
-## ç›®éŒ„
+## ¥Ø¿ı
+- [¦w¸Ë](#¦w¸Ë)
+- [§Ö³t¶}©l (Mail)](#§Ö³t¶}©l-mail)
+- [MailService ¨Ï¥Î»¡©ú](#mailservice-¨Ï¥Î»¡©ú)
+- [SMS Â²°TªA°È¡]¤¤µØ¹q«H IMSP¡^](#sms-Â²°TªA°È¤¤µØ¹q«H-imsp)
+- [Serilog ¾ã¦X](#serilog-¾ã¦X)
+- [¥\¯à¯S©Ê](#¥\¯à¯S©Ê)
+- [ª©¥»¾ú¥v](#ª©¥»¾ú¥v)
+- [¨Ì¿à¶µ](#¨Ì¿à¶µ)
+- [°^Äm](#°^Äm)
+- [±ÂÅv](#±ÂÅv)
 
-- [å®‰è£](#å®‰è£)
-- [ä½¿ç”¨](#ä½¿ç”¨)
-- [ä¾è³´é …](#ä¾è³´é …)
-- [è²¢ç»](#è²¢ç»)
-- [æˆæ¬Š](#æˆæ¬Š)
-
-## å®‰è£
-
-ä½ å¯ä»¥é€šé NuGet å®‰è£ EzLibï¼š
-
+## ¦w¸Ë
 ```bash
-dotnet add package EzLib.dotnet8.Tools 
-```	
-	
-æˆ–è€…åœ¨ä½ çš„ `.csproj` æ–‡ä»¶ä¸­æ·»åŠ ä»¥ä¸‹å¼•ç”¨
-
-
-## ä½¿ç”¨
-
-ä»¥ä¸‹æ˜¯ä¸€äº›ä½¿ç”¨ç¯„ä¾‹ï¼š
-
-### è¨­å®š Serilog
-
-```csharp
-using Serilog; 
-using EzLib;
-
-var logConfig = new LoggerConfiguration() 
-	.WriteTo.Console() 
-	.WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day);
-
-var logger = new EzLogger(logConfig);
-
-logger.Information("é€™æ˜¯ä¸€æ¢è³‡è¨Šæ—¥èªŒ"); 
-
-logger.Warning("é€™æ˜¯ä¸€æ¢è­¦å‘Šæ—¥èªŒ"); 
-
-logger.Error("é€™æ˜¯ä¸€æ¢éŒ¯èª¤æ—¥èªŒ");
+dotnet add package EzLib.dotnet8.Tools
+```
+©Î¦b `.csproj`¡G
+```xml
+<PackageReference Include="EzLib.dotnet8.Tools" Version="<³Ì·sª©>" />
 ```
 
-## ä¾è³´é …
+## §Ö³t¶}©l (Mail)
+```csharp
+using EzLib;
+using EzLib.Models;
 
-EzLib ä¾è³´ä»¥ä¸‹ NuGet åŒ…ï¼š
+var settings = new MailSettings
+{
+    Mail = "no-reply@yourdomain.com",
+    DisplayName = "³qª¾ªA°È",
+    Password = "yourpassword",
+    Host = "smtp.yourdomain.com",
+    Port = 587,
+    SSL = 3,            // StartTls
+    IsAuth = true,
+    Debug = true        // Åã¥Ü¸Ô²Ó SMTP ¬yµ{ (Serilog Debug)
+};
 
-- [MailKit](https://www.nuget.org/packages/MailKit) (ç‰ˆæœ¬ 4.7.1.1)
-- [Microsoft.AspNetCore.Http.Features](https://www.nuget.org/packages/Microsoft.AspNetCore.Http.Features) (ç‰ˆæœ¬ 5.0.17)
-- [MimeKit](https://www.nuget.org/packages/MimeKit) (ç‰ˆæœ¬ 4.7.1)
-- [Serilog](https://www.nuget.org/packages/Serilog) (ç‰ˆæœ¬ 4.0.1)
-- [Serilog.AspNetCore](https://www.nuget.org/packages/Serilog.AspNetCore) (ç‰ˆæœ¬ 8.0.2)
-- [Serilog.Sinks.Console](https://www.nuget.org/packages/Serilog.Sinks.Console) (ç‰ˆæœ¬ 6.0.0)
-- [Serilog.Sinks.File](https://www.nuget.org/packages/Serilog.Sinks.File) (ç‰ˆæœ¬ 6.0.0)
-- [Serilog.Sinks.MSSqlServer](https://www.nuget.org/packages/Serilog.Sinks.MSSqlServer) (ç‰ˆæœ¬ 6.6.1)
+var mailer = new SmtpMailer(settings);
+var request = new MailRequest
+{
+    ToEmail = "user1@xxx.com; user2@xxx.com", // ¤ä´© ; , ©Î´«¦æ
+    Subject = "¨t²Î³qª¾",
+    Body = "<b>ªA°È°õ¦æ¦¨¥\</b>",
+    IsHtml = true
+};
+var result = await mailer.SendAsync(request);
+```
 
-## è²¢ç»
+## MailService ¨Ï¥Î»¡©ú
+¯S¦â¡G
+- ¦h¦¬¥ó¤H / CC / BCC¡G¥H `,`¡B`;` ©Î´«¦æ¤À¹j
+- Debug = true¡GSerilog Debug ¼h¯Å¬ö¿ı ³s½u / ÅçÃÒ / ¶Ç°e / ªş¥ó
+- `#if DEBUG` ½sÄ¶®É¦Û°ÊÂĞ¼g¦¬¥ó¤HÁ×§K»~±H
+- ¹w³]¥D¦®¡G`[DisplayName] yyyy/MM/dd HH:mm`
+- ªş¥ó¤ä´© `IFormFile`
+- ¿ù»~°T®§¾ã¦X InnerException
 
-æ­¡è¿è²¢ç»ï¼
+### SSL ¼Ò¦¡ (MailSettings.SSL)
+| ­È | ¼Ò¦¡ |
+|----|------|
+| 0  | None |
+| 1  | Auto |
+| 2  | SslOnConnect |
+| 3  | StartTls |
+| 4  | StartTlsWhenAvailable |
 
-## æˆæ¬Š
+## SMS Â²°TªA°È¡]¤¤µØ¹q«H IMSP¡^
+´£¨ÑÂ²°TªA°È DI ÂX¥R¡A¥Ü¨Ò¹ï±µ¤¤µØ¹q«H IMSP ¥­¥x¡C
 
-é€™å€‹å°ˆæ¡ˆä½¿ç”¨ MIT æˆæ¬Šã€‚è©³æƒ…è«‹åƒé–± [LICENSE](LICENSE) æ–‡ä»¶ã€‚
+### ½d¨Ò³]©w `smssettings.json`
+```json
+{
+  "ApiServer": "imsp.hinet.net",
+  "ApiPort": 443,
+  "ApiRoute": "/imsp/sms/api/send",
+  "SenderNumber": "0912345678",
+  "Username": "your-imsp-account",
+  "Password": "your-imsp-password"
+}
+```
+> ¹ê»ÚÄæ¦ì»İ²Å¦X§Aªº `SmsSettings` ¹ê§@¡C
+
+### DI µù¥U»Pµo°e
+```csharp
+using EzLib.Extensions;
+using EzLib.Models;
+using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json;
+
+var services = new ServiceCollection();
+var smsCfg = JsonSerializer.Deserialize<SmsSettings>(File.ReadAllText("smssettings.json"));
+
+services.AddSmsService(o => {
+    o.ApiServer    = smsCfg.ApiServer;
+    o.ApiPort      = smsCfg.ApiPort;
+    o.ApiRoute     = smsCfg.ApiRoute;
+    o.SenderNumber = smsCfg.SenderNumber;
+    o.Username     = smsCfg.Username;
+    o.Password     = smsCfg.Password;
+});
+
+var sp  = services.BuildServiceProvider();
+var sms = sp.GetRequiredService<ISmsService>();
+var rtn = await sms.SendSmsAsync("0987654321", "¡i´ú¸Õ¡jIMSP µu°Tµo°e¦¨¥\");
+Console.WriteLine(rtn.IsSuccess ? $"¦¨¥\ ID={rtn.MessageId}" : $"¥¢±Ñ: {rtn.Message}");
+```
+
+### SmsResult Äæ¦ì
+| Äİ©Ê | »¡©ú |
+|------|------|
+| IsSuccess | ¬O§_¦¨¥\ |
+| Message | ¥­¥x©Î¿ù»~°T®§ |
+| MessageId | ¦¨¥\¦^¶Ç°T®§ ID |
+| RequestBody | ¡]°£¿ù¡^°e¥X­ì¤å |
+| ResponseBody | ¡]°£¿ù¡^¦^À³­ì¤å |
+
+### ª`·N¨Æ¶µ
+- IMSP ¥i¯à»İ¨Ó·½ IP ¥Õ¦W³æ»P±b¸¹±Ò¥Î
+- «ØÄ³©ó Serilog °O¿ı¥¢±Ñ®×¨Ò¤§ Request/Response¡]Á×§K±Ó·P¸ê°T¡^
+- ¤j¶qµo°e½Ğ¥[¤J­«¸Õ / ¸`¬y¡]Polly¡^
+
+## Serilog ¾ã¦X
+```csharp
+using Serilog;
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+    .WriteTo.File("logs/app-.log", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+```
+
+## ¥\¯à¯S©Ê
+- [x] Serilog ²Î¤@¾ã¦X
+- [x] ¶l¥ó±H°e¡]¦h¦¬¥ó¤H / ªş¥ó / Debug¡^
+- [x] Â²°TªA°È DI ÂX¥R¡]IMSP ¥Ü¨Ò¡^
+- [x] InnerException ¿ù»~°T®§·J¾ã
+- [x] Debug ¦w¥ş¦¬¥ó¤HÂĞ¼g
+- [ ] ¨Öµo¸`¬y»P­«¸Õµ¦²¤½d¥»¡]³W¹º¡^
+
+## ª©¥»¾ú¥v
+| ª©¥» | »¡©ú |
+|------|------|
+| 1.0.x | ¶l¥ó + Â²°T + Serilog °òÂ¦¾ã¦X |
+
+## ¨Ì¿à¶µ
+- MailKit / MimeKit
+- Serilog (Console / File / MSSqlServer Sinks)
+- Microsoft.AspNetCore.Http.Features
+
+## °^Äm
+Åwªï Issue / PR¡C
+
+## ±ÂÅv
+MIT ±ÂÅv¡A¸Ô¨£ LICENSE¡C

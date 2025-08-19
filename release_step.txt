@@ -1,0 +1,4 @@
+﻿dotnet clean
+dotnet build -c Release
+nuget pack EzLib.nuspec -OutputDirectory nupkgs
+nuget push nupkgs/EzLib.dotnet8.Tools.1.0.4.nupkg -ApiKey <API_KEY> -Source https://api.nuget.org/v3/index.json

@@ -2,19 +2,21 @@
 <package>
   <metadata>
     <id>EzLib.dotnet8.Tools</id>
-    <version>1.0.2</version>
-    <title>EzLib .Net8 Library</title>
+    <version>1.0.5</version>
+    <title>EzLib .NET8 Library</title>
     <authors>MarkChu</authors>
     <owners>Ezsoft4u Studio Inc.</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>EzLib is a .NET library for various utilities and functionalities.</description>
-    <releaseNotes>Initial release of EzLib.</releaseNotes>
-    <copyright>Copyright © 2024</copyright>
     <license type="expression">MIT</license>
-    <tags>utility library .NET</tags>
-    <readme>docs\readme.md</readme>
+    <description>EzLib 是一個 .NET 8 公用工具程式庫，提供 Serilog 整合、郵件寄送服務（多收件人 / 附件 / Debug 支援）等功能。</description>
+    <releaseNotes>1.0.5 - Internal maintenance (pack script automation).
+1.0.4 - Enhanced MailService: multi-recipient (To/Cc/Bcc) parsing, Serilog Debug integration, attachment logging, improved error messages (includes InnerException), safe recipient override in DEBUG build.
+1.0.0 - Initial release.</releaseNotes>
+    <copyright>Copyright © 2025 Ezsoft4u Studio Inc.</copyright>
+    <tags>utility tools serilog mail smtp logging dotnet8</tags>
+    <readme>docs/readme.md</readme>
+    <!-- 針對 .NET 8 的依賴項 -->
     <dependencies>
-      <!-- 針對 .NET 8 的依賴項 -->
       <group targetFramework="net8.0">
         <dependency id="Microsoft.AspNetCore.Http.Features" version="5.0.17" />
         <dependency id="Serilog" version="4.0.1" />
