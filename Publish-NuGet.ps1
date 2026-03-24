@@ -129,11 +129,12 @@ if(-not $whatIfPreference){
   if(-not (Test-Path $pkgFile)){ Write-Err "打包失敗，找不到: $pkgFile"; exit 1 }
 }
 
-# 取得 API Key
+# 取得 API Key（優先順序：-ApiKey 參數 > NUGET_API_KEY 環境變數 > apikey.txt）
 if(-not $ApiKey){
-  if(Test-Path 'apikey.txt'){ $ApiKey = (Get-Content 'apikey.txt' -Raw).Trim() }
+  if($env:NUGET_API_KEY)         { $ApiKey = $env:NUGET_API_KEY }
+  elseif(Test-Path 'apikey.txt') { $ApiKey = (Get-Content 'apikey.txt' -Raw).Trim() }
 }
-if(-not $ApiKey){ Write-Err '缺少 ApiKey (參數或 apikey.txt)'; exit 1 }
+if(-not $ApiKey){ Write-Err '缺少 ApiKey (參數、NUGET_API_KEY 環境變數或 apikey.txt)'; exit 1 }
 
 # 推送
 Write-Step "推送套件 -> $Source"
