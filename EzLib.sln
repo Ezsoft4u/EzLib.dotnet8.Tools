@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailTester", "..\..\EmailT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmsTester", "..\..\SmsTester\SmsTester.csproj", "{5A132EFE-E9D2-4823-9C56-66CC5F81818D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SystemMonitor", "..\..\SystemMonitorService\SystemMonitor.csproj", "{044290AE-0035-EA35-0C42-C4E2B7A37994}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SystemMonitor", "..\SystemMonitorService\SystemMonitor.csproj", "{044290AE-0035-EA35-0C42-C4E2B7A37994}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,3 +41,4 @@ Global
 		SolutionGuid = {B58ACAA8-AD31-4C04-87F6-69D826B42DC2}
 	EndGlobalSection
 EndGlobal
+
