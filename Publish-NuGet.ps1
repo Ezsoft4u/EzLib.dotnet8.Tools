@@ -69,7 +69,7 @@ $whatIfPreference = $PSCmdlet.WhatIfPreference
 
 if(-not (Test-Path $Nuspec)){ Write-Err "Nuspec 檔案不存在: $Nuspec"; exit 1 }
 
-[xml]$xml = Get-Content $Nuspec -Raw
+[xml]$xml = Get-Content $Nuspec -Raw -Encoding UTF8
 $currentVersion = $xml.package.metadata.version
 if([string]::IsNullOrWhiteSpace($currentVersion)){ Write-Err '無法讀取現有版本號'; exit 1 }
 Write-Info "目前版本: $currentVersion"
@@ -107,7 +107,10 @@ if($whatIfPreference){ Write-Warn 'WhatIf 模式：不進行實際修改'; }
 # 更新 nuspec 版本
 if(-not $whatIfPreference){
   $xml.package.metadata.version = $newVersion
-  $xml.Save((Resolve-Path $Nuspec))
+  $resolvedPath = (Resolve-Path $Nuspec).Path
+  $writer = [System.IO.StreamWriter]::new($resolvedPath, $false, [System.Text.UTF8Encoding]::new($false))
+  $xml.Save($writer)
+  $writer.Close()
   Write-Step "已更新 $Nuspec 版本為 $newVersion"
 }
 

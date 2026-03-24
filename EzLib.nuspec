@@ -1,31 +1,37 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
     <id>EzLib.dotnet8.Tools</id>
-    <version>1.0.5</version>
+    <version>1.0.9</version>
     <title>EzLib .NET8 Library</title>
     <authors>MarkChu</authors>
     <owners>Ezsoft4u Studio Inc.</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
-    <description>EzLib 是一個 .NET 8 公用工具程式庫，提供 Serilog 整合、郵件寄送服務（多收件人 / 附件 / Debug 支援）等功能。</description>
-    <releaseNotes>1.0.5 - Internal maintenance (pack script automation).
+    <description>EzLib 是一個 .NET 8 公用工具程式庫，提供 Serilog 整合、郵件寄送服務（多收件人 / 附件 / Debug 支援）、SystemMonitor 即時系統監控 API、MonitorCollector 定時收集與 Dashboard、SMS 通知及 SQL Server / SQLite 儲存後端等功能。</description>
+    <releaseNotes>1.0.6 - Upgrade all NuGet dependencies to latest stable versions compatible with .NET 8: Azure.Identity 1.19.0, MailKit/MimeKit 4.15.1, Serilog 4.3.1, Serilog.AspNetCore 10.0.0, Serilog.Sinks.Console 6.1.1, Serilog.Sinks.File 7.0.0, Serilog.Sinks.MSSqlServer 9.0.3, Microsoft.Data.SqlClient 7.0.0, Microsoft.Data.Sqlite 10.0.5, System.Text.Json 10.0.5.
+1.0.5 - Internal maintenance (pack script automation).
 1.0.4 - Enhanced MailService: multi-recipient (To/Cc/Bcc) parsing, Serilog Debug integration, attachment logging, improved error messages (includes InnerException), safe recipient override in DEBUG build.
 1.0.0 - Initial release.</releaseNotes>
     <copyright>Copyright © 2025 Ezsoft4u Studio Inc.</copyright>
-    <tags>utility tools serilog mail smtp logging dotnet8</tags>
+    <tags>utility tools serilog mail smtp logging dotnet8 systemmonitor monitor dashboard sqlite sqlserver sms</tags>
     <readme>docs/readme.md</readme>
     <!-- 針對 .NET 8 的依賴項 -->
     <dependencies>
       <group targetFramework="net8.0">
+        <dependency id="Azure.Identity" version="1.19.0" />
+        <dependency id="MailKit" version="4.15.1" />
         <dependency id="Microsoft.AspNetCore.Http.Features" version="5.0.17" />
-        <dependency id="Serilog" version="4.0.1" />
-        <dependency id="Serilog.AspNetCore" version="8.0.2" />
-        <dependency id="Serilog.Sinks.Console" version="6.0.0" />
-        <dependency id="Serilog.Sinks.File" version="6.0.0" />
-        <dependency id="Serilog.Sinks.MSSqlServer" version="6.6.1" />
-        <dependency id="MailKit" version="4.7.1.1" />
-        <dependency id="MimeKit" version="4.7.1" />
+        <dependency id="Microsoft.Data.SqlClient" version="7.0.0" />
+        <dependency id="Microsoft.Data.Sqlite" version="10.0.5" />
+        <dependency id="Microsoft.Identity.Client" version="4.83.1" />
+        <dependency id="MimeKit" version="4.15.1" />
+        <dependency id="Serilog" version="4.3.1" />
+        <dependency id="Serilog.AspNetCore" version="10.0.0" />
+        <dependency id="Serilog.Sinks.Console" version="6.1.1" />
+        <dependency id="Serilog.Sinks.File" version="7.0.0" />
+        <dependency id="Serilog.Sinks.MSSqlServer" version="9.0.3" />
+        <dependency id="System.Text.Json" version="10.0.5" />
       </group>
     </dependencies>
   </metadata>
