@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>EzLib.dotnet8.Tools</id>
-    <version>1.0.9</version>
+    <version>1.0.11</version>
     <title>EzLib .NET8 Library</title>
     <authors>MarkChu</authors>
     <owners>Ezsoft4u Studio Inc.</owners>
