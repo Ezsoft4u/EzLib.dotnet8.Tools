@@ -58,6 +58,10 @@ namespace EzLib.Models
         /// 錯誤訊息
         /// </summary>
         public string? Message { get; set; }
+        /// <summary>
+        /// Debug 資訊（僅 Debug 模式下提供）  
+        /// </summary>
+        public string? DebugInfo { get; set; }
     }
 
     public class MailRequest

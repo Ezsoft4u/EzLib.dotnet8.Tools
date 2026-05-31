@@ -4,11 +4,13 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
 using Serilog; // 新增：Serilog
+using Serilog.Events;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace EzLib.Services
@@ -17,10 +19,10 @@ namespace EzLib.Services
     {
         private readonly MailSettings _mailSettings;
         private readonly ILogger _logger; // Serilog logger
-        public MailService(MailSettings mailSettings)
+        public MailService(MailSettings mailSettings, ILogger? logger = null)
         {
             _mailSettings = mailSettings ?? throw new ArgumentNullException(nameof(mailSettings));
-            _logger = Log.ForContext<MailService>();
+            _logger = logger ?? Log.ForContext<MailService>();
         }
 
         public async Task<MailResult> SendEmailAsync(MailRequest mailRequest)
@@ -42,7 +44,7 @@ namespace EzLib.Services
                 LogDebug($"SMTP 設定 Host={_mailSettings.Host}, Port={_mailSettings.Port}, SSL={_mailSettings.SSL}, Auth={isAuth}");
 
                 using var smtp = _mailSettings.Debug
-                    ? new SmtpClient(new ProtocolLogger(Console.OpenStandardOutput()))
+                    ? new SmtpClient(new SerilogProtocolLogger(_logger, LogEventLevel.Information))
                     : new SmtpClient();
 
                 if (_mailSettings.Debug)
@@ -66,6 +68,44 @@ namespace EzLib.Services
             }
 
             return result;
+        }
+
+        internal sealed class SerilogProtocolLogger : IProtocolLogger
+        {
+            private readonly ILogger _logger;
+            private readonly LogEventLevel _level;
+            private readonly Encoding _encoding;
+
+            public SerilogProtocolLogger(ILogger logger, LogEventLevel level = LogEventLevel.Information, Encoding? encoding = null)
+            {
+                _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+                _level = level;
+                _encoding = encoding ?? Encoding.UTF8;
+            }
+
+            public IAuthenticationSecretDetector? AuthenticationSecretDetector { get; set; }
+
+            public void LogConnect(Uri uri) => _logger.Write(_level, "SMTP Connect: {Uri}", uri);
+            public void LogDisconnect(Uri uri) => _logger.Write(_level, "SMTP Disconnect: {Uri}", uri);
+
+            public void LogClient(byte[] buffer, int offset, int count) => LogChunk("C", buffer, offset, count);
+            public void LogServer(byte[] buffer, int offset, int count) => LogChunk("S", buffer, offset, count);
+
+            private void LogChunk(string direction, byte[] buffer, int offset, int count)
+            {
+                if (count <= 0) return;
+                var text = _encoding.GetString(buffer, offset, count).TrimEnd('\r', '\n');
+                
+                // 分行輸出，避免多行訊息被截斷
+                foreach (var line in text.Split('\n'))
+                {
+                    var trimmed = line.TrimEnd('\r');
+                    if (!string.IsNullOrWhiteSpace(trimmed))
+                        _logger.Write(_level, "{Direction}: {Message}", direction, trimmed);
+                }
+            }
+
+            public void Dispose() { }
         }
 
         /// <summary>
@@ -163,6 +203,9 @@ namespace EzLib.Services
 
                 if (isAuth)
                 {
+                    if (string.IsNullOrWhiteSpace(_mailSettings.Password))
+                        throw new InvalidOperationException("MailSettings.Password 不可為空，因為 IsAuth 已啟用。");
+
                     LogDebug("進行身份驗證...");
                     await smtp.AuthenticateAsync(_mailSettings.Mail, _mailSettings.Password);
                     LogDebug("身份驗證成功");

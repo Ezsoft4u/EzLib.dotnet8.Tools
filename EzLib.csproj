@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -8,7 +8,7 @@
     <!-- NuGet 套件必要中繼資料 -->
     <IsPackable>true</IsPackable>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <Version>1.0.11</Version>
+    <Version>1.0.12</Version>
   </PropertyGroup>
 
   <!-- 宣告對 ASP.NET Core 共用框架的相依性，讓擴充方法在安裝方正確解析 -->
@@ -18,9 +18,9 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.19.0" />
-    <PackageReference Include="MailKit" Version="4.15.1" />
+    <PackageReference Include="MailKit" Version="4.16.0" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.83.1" />
-    <PackageReference Include="MimeKit" Version="4.15.1" />
+    <PackageReference Include="MimeKit" Version="4.16.0" />
     <PackageReference Include="Serilog" Version="4.3.1" />
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
@@ -29,6 +29,12 @@
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.5" />
     <PackageReference Include="Serilog.Sinks.MSSqlServer" Version="9.0.3" />
     <PackageReference Include="System.Text.Json" Version="10.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="EzLib.Tests\**\*.cs" />
+    <EmbeddedResource Remove="EzLib.Tests\**\*" />
+    <None Remove="EzLib.Tests\**\*" />
   </ItemGroup>
 
 </Project>
