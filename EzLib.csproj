@@ -8,7 +8,7 @@
     <!-- NuGet 套件必要中繼資料 -->
     <IsPackable>true</IsPackable>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <Version>1.0.12</Version>
+    <Version>1.0.18</Version>
   </PropertyGroup>
 
   <!-- 宣告對 ASP.NET Core 共用框架的相依性，讓擴充方法在安裝方正確解析 -->

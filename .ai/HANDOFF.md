@@ -3,7 +3,7 @@ title: EzLib Handoff
 type: handoff
 status: active
 project: Ezsoft4u-EzLib.dotnet8.Tools
-updated: 2026-05-31
+updated: 2026-06-03
 tags:
   - ai-team
   - handoff
@@ -13,7 +13,7 @@ tags:
 
 ## Current Focus
 
-Add LINE notification API and message receiving API helpers to the EzLib .NET utility library.
+Add reusable web helpers to the EzLib .NET utility library, most recently Log Viewer for host-project log files.
 
 ## What Changed Recently
 
@@ -31,6 +31,17 @@ Add LINE notification API and message receiving API helpers to the EzLib .NET ut
   - configure `LineBots:{botName}:ChannelAccessToken/ChannelSecret`
   - resolve `ILineBotFactory.GetBot("botName")`
   - map named webhook routes with `MapLineWebhook("/line/admin/webhook", "admin", handler)`
+- Log Viewer support was added for consuming ASP.NET Core projects:
+  - `LogViewerSettings`, `LogViewerFile`, `LogReadRequest`, and `LogReadResult`.
+  - `ILogViewerService` / `FileLogViewerService` for configured log directory file listing and content reading.
+  - Date/time range filtering preserves continuation lines such as exception stack traces.
+  - Path traversal file names are rejected.
+  - `LogViewerMiddleware` provides `/logs`, `/logs/api/files`, and `/logs/api/content`.
+  - `AddLogViewer(...)` and `UseLogViewer()` extension methods.
+  - Preferred simple setup reads a single appsettings key such as `"SystemLogDirectory": "logs"` through `builder.Services.AddLogViewer(builder.Configuration, "SystemLogDirectory")`.
+  - Browser smoke test found favicon 404 console noise; HTML now includes an inline favicon.
+  - `docs/log-viewer.md` and `docs/readme.md` usage notes.
+  - Package metadata bumped to `1.0.18` with Log Viewer release notes and `docs/log-viewer.md` included in the nupkg.
 - Session started with existing uncommitted changes in:
   - `EzLib.nuspec`
   - `Models/MailServiceVM.cs`
@@ -40,7 +51,7 @@ Add LINE notification API and message receiving API helpers to the EzLib .NET ut
 
 ## Next Best Action
 
-If publishing a NuGet package, decide whether to bump the package version and update release notes for LINE Messaging API support.
+After commit/push, publish NuGet package `EzLib.dotnet8.Tools` version `1.0.18`.
 
 ## Watchouts
 
@@ -49,7 +60,18 @@ If publishing a NuGet package, decide whether to bump the package version and up
 - `ServiceCollectionExtensions.cs` is non-UTF-8/legacy encoded, so LINE DI extensions were added in a separate UTF-8 file instead of editing it.
 - Existing SMS nullable warnings remain in `SmsService.cs`; MailKit/MimeKit vulnerability warnings are resolved.
 - `ApiBaseUrl` is an optional advanced override only; normal users should not configure it.
+- Log Viewer reads the host project's configured `LogDirectory`; it does not read EzLib's own package directory.
+- Protect `/logs` in deployed systems with `RequireViewerKey` or upstream auth because log files can contain sensitive operational details.
 
 ## Open Questions
 
-- None currently; implement a minimal reusable LINE Messaging API wrapper with configuration injected by the caller.
+- None currently.
+
+## Verification
+
+- Temporary ASP.NET Core net8.0 smoke host referenced local EzLib, used only `"SystemLogDirectory": "system-logs"` in appsettings, and served `/logs`.
+- HTTP smoke passed for `/logs`, `/logs/api/files`, and `/logs/api/content?file=app-20260603.txt&from=2026-06-03T10:20:00%2B08:00&to=2026-06-03T10:40:00%2B08:00&tailLines=50`.
+- Playwright browser smoke loaded `/logs`, listed two log files, and UI date-range query returned only the 10:30 error with stack trace.
+- `dotnet test .\EzLib.Tests\EzLib.Tests.csproj -v minimal` passed on 2026-06-03 with 17 tests.
+- `dotnet build .\EzLib.csproj -c Release -v minimal` passed on 2026-06-03 with existing `SmsService` nullable warnings.
+- `nuget pack .\EzLib.nuspec -OutputDirectory $env:TEMP\EzLibPackCheck-1.0.18` produced `EzLib.dotnet8.Tools.1.0.18.nupkg`; package inspection confirmed `docs/readme.md`, `docs/line-messaging.md`, and `docs/log-viewer.md`.

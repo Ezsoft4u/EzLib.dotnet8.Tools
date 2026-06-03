@@ -11,6 +11,7 @@ EzLib.dotnet8.Tools 是一個基於 .NET 8 的常用工具程式庫，整合：
 - [MailService 使用說明](#mailservice-使用說明)
 - [SMS 簡訊服務（中華電信 IMSP）](#sms-簡訊服務中華電信-imsp)
 - [Serilog 整合](#serilog-整合)
+- [Log Viewer](#log-viewer)
 - [系統監控模組 (SystemMonitor)](#系統監控模組-systemmonitor)
 - [遠端監控收集模組 (MonitorCollector)](#遠端監控收集模組-monitorcollector)
 - [功能特性](#功能特性)
@@ -139,8 +140,30 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 ```
 
+## Log Viewer
+
+Log Viewer 提供 ASP.NET Core 專案可掛載的 log 瀏覽 UI 與 API，讀取的是引用 EzLib 的宿主專案所設定的 log 目錄。
+
+```csharp
+using EzLib.Extensions;
+
+builder.Services.AddLogViewer(builder.Configuration, "SystemLogDirectory");
+app.UseLogViewer(); // 預設 /logs
+```
+
+`appsettings.json`：
+
+```json
+{
+  "SystemLogDirectory": "logs"
+}
+```
+
+也可在 Startup / Program.cs 直接傳入 `builder.Configuration["SystemLogDirectory"]`。功能包含多 log 檔選擇、日期時間起訖查詢、5 秒即時刷新，以及多行 exception stack trace 保留。詳細說明見 `docs/log-viewer.md`。
+
 ## 功能特性
 - [x] Serilog 統一整合
+- [x] Log Viewer（宿主專案 log 檔瀏覽 + 起訖時間查詢）
 - [x] 郵件寄送（多收件人 / 附件 / Debug）
 - [x] 簡訊服務 DI 擴充（IMSP 示例）
 - [x] InnerException 錯誤訊息彙整
