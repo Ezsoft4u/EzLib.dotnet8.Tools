@@ -33,10 +33,11 @@ Shared .NET 8 utility library for Ezsoft4u projects.
 - [x] Corrected `Serilog.AspNetCore` dependency from `10.0.0` to `9.0.0` for the next package.
 - [x] Published NuGet package `EzLib.dotnet8.Tools` version `1.0.19`.
 - [x] Fixed Log Viewer nested config key, host ContentRoot-relative path resolution, and default `.log` file listing for the next package.
+- [x] Published NuGet package `EzLib.dotnet8.Tools` version `1.0.20`.
 
 ## Doing
 
-- [ ] Publish NuGet package `EzLib.dotnet8.Tools` version `1.0.20`.
+- [ ] None currently.
 
 ## Next Actions
 
@@ -86,6 +87,7 @@ dotnet build EzLib.sln
 - 2026-06-03: Package metadata bumped to `1.0.19`; `Serilog.AspNetCore` pinned to `9.0.0` in both csproj and nuspec.
 - 2026-06-03: `nuget push` for `EzLib.dotnet8.Tools.1.0.19.nupkg` succeeded; NuGet version page returned HTTP 200 and flat-container index included `1.0.19`.
 - 2026-06-03: Package metadata bumped to `1.0.20`; Log Viewer relative directories now resolve from host `ContentRootPath`, default file pattern is `*.*`, and docs show nested keys such as `PxApi:LogDirectory`.
+- 2026-06-03: `nuget push` for `EzLib.dotnet8.Tools.1.0.20.nupkg` succeeded; NuGet version page returned HTTP 200 and flat-container index included `1.0.20`.
 
 ## Notes For Cloud Agents
 

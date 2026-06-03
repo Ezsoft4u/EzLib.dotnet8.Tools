@@ -13,7 +13,7 @@ tags:
 
 ## Current Focus
 
-Log Viewer nested config key and relative path handling are being fixed for EzLib NuGet package `1.0.20`.
+Log Viewer nested config key and relative path handling shipped in EzLib NuGet package `1.0.20`.
 
 ## What Changed Recently
 
@@ -51,7 +51,7 @@ Log Viewer nested config key and relative path handling are being fixed for EzLi
 
 ## Next Best Action
 
-Publish NuGet package `EzLib.dotnet8.Tools` version `1.0.20`.
+No immediate next action. `EzLib.dotnet8.Tools` version `1.0.20` is published and indexed.
 
 ## Watchouts
 
@@ -89,3 +89,5 @@ Publish NuGet package `EzLib.dotnet8.Tools` version `1.0.20`.
 - `dotnet build .\EzLib.csproj -c Release -v minimal` passed on 2026-06-03 with existing `SmsService` nullable warnings after the nested key/content-root fix.
 - Temporary ASP.NET Core smoke host used `PxApi:LogDirectory = logs`, created `logs/app.log`, and `/logs/api/files` returned `app.log`.
 - `nuget pack .\EzLib.nuspec -OutputDirectory $env:TEMP\EzLibPackCheck-1.0.20` produced `EzLib.dotnet8.Tools.1.0.20.nupkg`.
+- `nuget push` returned `Your package was pushed` for `EzLib.dotnet8.Tools.1.0.20.nupkg`.
+- `https://www.nuget.org/packages/EzLib.dotnet8.Tools/1.0.20` returned HTTP 200 and flat-container index included `1.0.20`.
