@@ -13,7 +13,7 @@ tags:
 
 ## Current Focus
 
-Add reusable web helpers to the EzLib .NET utility library, most recently Log Viewer for host-project log files.
+Log Viewer for host-project log files shipped in EzLib NuGet package `1.0.18`.
 
 ## What Changed Recently
 
@@ -51,7 +51,7 @@ Add reusable web helpers to the EzLib .NET utility library, most recently Log Vi
 
 ## Next Best Action
 
-After commit/push, publish NuGet package `EzLib.dotnet8.Tools` version `1.0.18`.
+Monitor NuGet indexing if needed; package page for `1.0.18` is already reachable, but flat-container/search indexing may lag shortly after publish.
 
 ## Watchouts
 
@@ -75,3 +75,5 @@ After commit/push, publish NuGet package `EzLib.dotnet8.Tools` version `1.0.18`.
 - `dotnet test .\EzLib.Tests\EzLib.Tests.csproj -v minimal` passed on 2026-06-03 with 17 tests.
 - `dotnet build .\EzLib.csproj -c Release -v minimal` passed on 2026-06-03 with existing `SmsService` nullable warnings.
 - `nuget pack .\EzLib.nuspec -OutputDirectory $env:TEMP\EzLibPackCheck-1.0.18` produced `EzLib.dotnet8.Tools.1.0.18.nupkg`; package inspection confirmed `docs/readme.md`, `docs/line-messaging.md`, and `docs/log-viewer.md`.
+- `nuget push` returned `Your package was pushed` for `EzLib.dotnet8.Tools.1.0.18.nupkg`.
+- `https://www.nuget.org/packages/EzLib.dotnet8.Tools/1.0.18` returned HTTP 200 and page content confirmed package id/version. Search/flat-container endpoints still showed `1.0.17` immediately after push, likely NuGet indexing delay.

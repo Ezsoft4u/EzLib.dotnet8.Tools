@@ -29,16 +29,15 @@ Shared .NET 8 utility library for Ezsoft4u projects.
 - [x] Added Log Viewer middleware and service for host projects to browse their configured log directory from `/logs`.
 - [x] Added tests for log file listing, date-range filtering, path traversal rejection, and middleware routing.
 - [x] Added simplified Log Viewer registration from a single appsettings key such as `SystemLogDirectory`, plus direct string log directory registration.
+- [x] Published NuGet package `EzLib.dotnet8.Tools` version `1.0.18`.
 
 ## Doing
 
-- [ ] Publish NuGet package `EzLib.dotnet8.Tools` version `1.0.18`.
+- [ ] Monitor NuGet flat-container/search indexing if immediate install lookup does not show `1.0.18`.
 
 ## Next Actions
 
-1. Commit and push Log Viewer changes.
-2. Publish NuGet package `EzLib.dotnet8.Tools` version `1.0.18`.
-3. Consider whether Log Viewer should be protected by a deployment-specific key in each consuming project.
+1. Consider whether Log Viewer should be protected by a deployment-specific key in each consuming project.
 
 ## Blockers
 
@@ -80,6 +79,7 @@ dotnet build EzLib.sln
 - 2026-06-03: Log Viewer docs now show the preferred simple appsettings usage: `"SystemLogDirectory": "logs"` with `builder.Services.AddLogViewer(builder.Configuration, "SystemLogDirectory")`.
 - 2026-06-03: Real browser smoke test found favicon 404 noise; `LogViewerMiddleware` HTML now declares an inline favicon.
 - 2026-06-03: Package metadata bumped to `1.0.18`; release notes and NuGet docs include Log Viewer.
+- 2026-06-03: `nuget push` for `EzLib.dotnet8.Tools.1.0.18.nupkg` succeeded. NuGet version page returned HTTP 200 and confirmed package id/version; search/flat-container indexing may lag shortly after publish.
 
 ## Notes For Cloud Agents
 
