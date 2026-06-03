@@ -13,7 +13,7 @@ tags:
 
 ## Current Focus
 
-Serilog.AspNetCore dependency is being pinned back to 9.0.x for EzLib NuGet package `1.0.19`.
+Serilog.AspNetCore dependency was pinned back to 9.0.x and shipped in EzLib NuGet package `1.0.19`.
 
 ## What Changed Recently
 
@@ -51,7 +51,7 @@ Serilog.AspNetCore dependency is being pinned back to 9.0.x for EzLib NuGet pack
 
 ## Next Best Action
 
-Publish NuGet package `EzLib.dotnet8.Tools` version `1.0.19` after committing the dependency correction.
+No immediate next action. `EzLib.dotnet8.Tools` version `1.0.19` is published and indexed.
 
 ## Watchouts
 
@@ -81,3 +81,5 @@ Publish NuGet package `EzLib.dotnet8.Tools` version `1.0.19` after committing th
 - `dotnet test .\EzLib.Tests\EzLib.Tests.csproj -v minimal` passed on 2026-06-03 with 17 tests after the dependency correction.
 - `dotnet build .\EzLib.csproj -c Release -v minimal` passed on 2026-06-03 with existing `SmsService` nullable warnings after the dependency correction.
 - `nuget pack .\EzLib.nuspec -OutputDirectory $env:TEMP\EzLibPackCheck-1.0.19` produced `EzLib.dotnet8.Tools.1.0.19.nupkg`; package inspection confirmed `Serilog.AspNetCore` dependency version `9.0.0`.
+- `nuget push` returned `Your package was pushed` for `EzLib.dotnet8.Tools.1.0.19.nupkg`.
+- `https://www.nuget.org/packages/EzLib.dotnet8.Tools/1.0.19` returned HTTP 200 and flat-container index included `1.0.19`.

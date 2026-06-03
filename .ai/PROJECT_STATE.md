@@ -31,10 +31,11 @@ Shared .NET 8 utility library for Ezsoft4u projects.
 - [x] Added simplified Log Viewer registration from a single appsettings key such as `SystemLogDirectory`, plus direct string log directory registration.
 - [x] Published NuGet package `EzLib.dotnet8.Tools` version `1.0.18`.
 - [x] Corrected `Serilog.AspNetCore` dependency from `10.0.0` to `9.0.0` for the next package.
+- [x] Published NuGet package `EzLib.dotnet8.Tools` version `1.0.19`.
 
 ## Doing
 
-- [ ] Publish NuGet package `EzLib.dotnet8.Tools` version `1.0.19`.
+- [ ] None currently.
 
 ## Next Actions
 
@@ -82,6 +83,7 @@ dotnet build EzLib.sln
 - 2026-06-03: Package metadata bumped to `1.0.18`; release notes and NuGet docs include Log Viewer.
 - 2026-06-03: `nuget push` for `EzLib.dotnet8.Tools.1.0.18.nupkg` succeeded. NuGet version page returned HTTP 200 and confirmed package id/version; search/flat-container indexing may lag shortly after publish.
 - 2026-06-03: Package metadata bumped to `1.0.19`; `Serilog.AspNetCore` pinned to `9.0.0` in both csproj and nuspec.
+- 2026-06-03: `nuget push` for `EzLib.dotnet8.Tools.1.0.19.nupkg` succeeded; NuGet version page returned HTTP 200 and flat-container index included `1.0.19`.
 
 ## Notes For Cloud Agents
 
