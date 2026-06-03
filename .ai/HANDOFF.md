@@ -13,7 +13,7 @@ tags:
 
 ## Current Focus
 
-Log Viewer for host-project log files shipped in EzLib NuGet package `1.0.18`.
+Serilog.AspNetCore dependency is being pinned back to 9.0.x for EzLib NuGet package `1.0.19`.
 
 ## What Changed Recently
 
@@ -51,7 +51,7 @@ Log Viewer for host-project log files shipped in EzLib NuGet package `1.0.18`.
 
 ## Next Best Action
 
-Monitor NuGet indexing if needed; package page for `1.0.18` is already reachable, but flat-container/search indexing may lag shortly after publish.
+Publish NuGet package `EzLib.dotnet8.Tools` version `1.0.19` after committing the dependency correction.
 
 ## Watchouts
 
@@ -77,3 +77,7 @@ Monitor NuGet indexing if needed; package page for `1.0.18` is already reachable
 - `nuget pack .\EzLib.nuspec -OutputDirectory $env:TEMP\EzLibPackCheck-1.0.18` produced `EzLib.dotnet8.Tools.1.0.18.nupkg`; package inspection confirmed `docs/readme.md`, `docs/line-messaging.md`, and `docs/log-viewer.md`.
 - `nuget push` returned `Your package was pushed` for `EzLib.dotnet8.Tools.1.0.18.nupkg`.
 - `https://www.nuget.org/packages/EzLib.dotnet8.Tools/1.0.18` returned HTTP 200 and page content confirmed package id/version. Search/flat-container endpoints still showed `1.0.17` immediately after push, likely NuGet indexing delay.
+- 2026-06-03 dependency correction: `Serilog.AspNetCore` changed from `10.0.0` to `9.0.0`; `dotnet list .\EzLib.csproj package` confirmed requested/resolved `9.0.0`.
+- `dotnet test .\EzLib.Tests\EzLib.Tests.csproj -v minimal` passed on 2026-06-03 with 17 tests after the dependency correction.
+- `dotnet build .\EzLib.csproj -c Release -v minimal` passed on 2026-06-03 with existing `SmsService` nullable warnings after the dependency correction.
+- `nuget pack .\EzLib.nuspec -OutputDirectory $env:TEMP\EzLibPackCheck-1.0.19` produced `EzLib.dotnet8.Tools.1.0.19.nupkg`; package inspection confirmed `Serilog.AspNetCore` dependency version `9.0.0`.
