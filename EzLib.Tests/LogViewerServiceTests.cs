@@ -5,6 +5,8 @@ using EzLib.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 using System.Text;
 using Xunit;
 
@@ -168,6 +170,29 @@ public class LogViewerServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task AddLogViewer_reads_nested_key_and_resolves_relative_path_from_host_content_root()
+    {
+        var logDirectory = Path.Combine(_tempDirectory, "logs");
+        Directory.CreateDirectory(logDirectory);
+        await File.WriteAllTextAsync(Path.Combine(logDirectory, "app.log"), "from nested key");
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["PxApi:LogDirectory"] = "logs"
+            })
+            .Build();
+        var provider = new ServiceCollection()
+            .AddSingleton<IHostEnvironment>(new StubHostEnvironment(_tempDirectory))
+            .AddLogViewer(configuration, "PxApi:LogDirectory")
+            .BuildServiceProvider();
+
+        var service = provider.GetRequiredService<ILogViewerService>();
+        var files = await service.ListLogFilesAsync();
+
+        Assert.Contains(files, file => file.Name == "app.log");
+    }
+
+    [Fact]
     public async Task AddLogViewer_accepts_log_directory_directly()
     {
         await File.WriteAllTextAsync(Path.Combine(_tempDirectory, "direct-20260603.txt"), "from startup value");
@@ -199,5 +224,22 @@ public class LogViewerServiceTests : IDisposable
             LogDirectory = _tempDirectory,
             FileSearchPattern = "*.txt"
         };
+    }
+
+    private sealed class StubHostEnvironment : IHostEnvironment
+    {
+        public StubHostEnvironment(string contentRootPath)
+        {
+            ContentRootPath = contentRootPath;
+            ContentRootFileProvider = new PhysicalFileProvider(contentRootPath);
+        }
+
+        public string EnvironmentName { get; set; } = Environments.Development;
+
+        public string ApplicationName { get; set; } = "LogViewerTests";
+
+        public string ContentRootPath { get; set; }
+
+        public IFileProvider ContentRootFileProvider { get; set; }
     }
 }

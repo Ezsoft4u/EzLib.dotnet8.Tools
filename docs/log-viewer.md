@@ -8,7 +8,9 @@ Log Viewer 提供宿主 ASP.NET Core 專案可掛載的 log 瀏覽 UI 與 API。
 
 ```json
 {
-  "SystemLogDirectory": "logs"
+  "PxApi": {
+    "LogDirectory": "logs"
+  }
 }
 ```
 
@@ -17,21 +19,21 @@ Log Viewer 提供宿主 ASP.NET Core 專案可掛載的 log 瀏覽 UI 與 API。
 ```csharp
 using EzLib.Extensions;
 
-builder.Services.AddLogViewer(builder.Configuration, "SystemLogDirectory");
+builder.Services.AddLogViewer(builder.Configuration, "PxApi:LogDirectory");
 
 var app = builder.Build();
 
 app.UseLogViewer(); // 預設掛載 /logs
 ```
 
-也可以在 Startup / Program.cs 直接把 appsettings 的值傳進來：
+也可以使用任意 appsettings key path，或在 Startup / Program.cs 直接把 appsettings 的值傳進來：
 
 ```csharp
-builder.Services.AddLogViewer(builder.Configuration["SystemLogDirectory"] ?? "logs");
+builder.Services.AddLogViewer(builder.Configuration["PxApi:LogDirectory"] ?? "logs");
 app.UseLogViewer();
 ```
 
-`LogDirectory` 可以是絕對路徑，也可以是相對於網站啟動目錄的相對路徑。
+`LogDirectory` 可以是絕對路徑，也可以是相對於宿主網站 `ContentRootPath` 的相對路徑。
 
 ## 進階設定
 
@@ -42,7 +44,7 @@ app.UseLogViewer();
   "LogViewer": {
     "ViewerPath": "/logs",
     "LogDirectory": "logs",
-    "FileSearchPattern": "*.txt",
+    "FileSearchPattern": "*.*",
     "DefaultTailLines": 500,
     "MaxTailLines": 5000,
     "RequireViewerKey": true,
@@ -74,6 +76,7 @@ app.UseLogViewer();
 - 可選擇指定檔案查詢。
 - 支援日期時間起迄查詢；Serilog 預設格式的多行 exception stack trace 會跟著同一筆 log 一起顯示。
 - 預設每 5 秒重新讀取目前檔案，方便即時看錯誤訊息。
+- 預設檔名樣式為 `*.*`，可列出 `.log`、`.txt` 或其他宿主專案輸出的 log 檔。
 - 僅允許讀取設定目錄底下的檔名，阻擋 `../` 這類路徑跳脫。
 
 ## API

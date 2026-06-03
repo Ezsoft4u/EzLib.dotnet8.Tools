@@ -147,7 +147,7 @@ Log Viewer 提供 ASP.NET Core 專案可掛載的 log 瀏覽 UI 與 API，讀取
 ```csharp
 using EzLib.Extensions;
 
-builder.Services.AddLogViewer(builder.Configuration, "SystemLogDirectory");
+builder.Services.AddLogViewer(builder.Configuration, "PxApi:LogDirectory");
 app.UseLogViewer(); // 預設 /logs
 ```
 
@@ -155,11 +155,13 @@ app.UseLogViewer(); // 預設 /logs
 
 ```json
 {
-  "SystemLogDirectory": "logs"
+  "PxApi": {
+    "LogDirectory": "logs"
+  }
 }
 ```
 
-也可在 Startup / Program.cs 直接傳入 `builder.Configuration["SystemLogDirectory"]`。功能包含多 log 檔選擇、日期時間起訖查詢、5 秒即時刷新，以及多行 exception stack trace 保留。詳細說明見 `docs/log-viewer.md`。
+也可在 Startup / Program.cs 直接傳入 `builder.Configuration["PxApi:LogDirectory"]`。相對路徑會以宿主網站 `ContentRootPath` 為基準，預設會列出 `.log`、`.txt` 等所有檔案。功能包含多 log 檔選擇、日期時間起訖查詢、5 秒即時刷新，以及多行 exception stack trace 保留。詳細說明見 `docs/log-viewer.md`。
 
 ## 功能特性
 - [x] Serilog 統一整合

@@ -12,7 +12,7 @@ namespace EzLib.Models
         public string LogDirectory { get; set; } = "logs";
 
         /// <summary>要列出的 log 檔搜尋樣式。</summary>
-        public string FileSearchPattern { get; set; } = "*.txt";
+        public string FileSearchPattern { get; set; } = "*.*";
 
         /// <summary>未指定筆數時預設讀取的最後行數。</summary>
         public int DefaultTailLines { get; set; } = 500;

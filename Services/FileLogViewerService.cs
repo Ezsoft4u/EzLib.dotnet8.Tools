@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using EzLib.Models;
+using Microsoft.Extensions.Hosting;
 
 namespace EzLib.Services
 {
@@ -17,9 +18,19 @@ namespace EzLib.Services
         private readonly string _logDirectory;
 
         public FileLogViewerService(LogViewerSettings settings)
+            : this(settings, contentRootPath: null)
+        {
+        }
+
+        public FileLogViewerService(LogViewerSettings settings, IHostEnvironment hostEnvironment)
+            : this(settings, hostEnvironment?.ContentRootPath)
+        {
+        }
+
+        private FileLogViewerService(LogViewerSettings settings, string? contentRootPath)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
-            _logDirectory = ResolveLogDirectory(settings.LogDirectory);
+            _logDirectory = ResolveLogDirectory(settings.LogDirectory, contentRootPath);
         }
 
         /// <summary>
@@ -94,7 +105,7 @@ namespace EzLib.Services
             };
         }
 
-        private static string ResolveLogDirectory(string configuredDirectory)
+        private static string ResolveLogDirectory(string configuredDirectory, string? contentRootPath)
         {
             var directory = string.IsNullOrWhiteSpace(configuredDirectory)
                 ? "logs"
@@ -102,7 +113,9 @@ namespace EzLib.Services
 
             return Path.IsPathRooted(directory)
                 ? Path.GetFullPath(directory)
-                : Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), directory));
+                : Path.GetFullPath(Path.Combine(
+                    string.IsNullOrWhiteSpace(contentRootPath) ? Directory.GetCurrentDirectory() : contentRootPath,
+                    directory));
         }
 
         private string ResolveLogFilePath(string fileName)

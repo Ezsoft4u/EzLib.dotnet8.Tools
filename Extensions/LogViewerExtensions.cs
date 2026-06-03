@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 
 namespace EzLib.Extensions
 {
@@ -83,7 +84,13 @@ namespace EzLib.Extensions
             LogViewerSettings settings)
         {
             services.AddSingleton(settings);
-            services.TryAddSingleton<ILogViewerService, FileLogViewerService>();
+            services.TryAddSingleton<ILogViewerService>(provider =>
+            {
+                var hostEnvironment = provider.GetService<IHostEnvironment>();
+                return hostEnvironment == null
+                    ? new FileLogViewerService(settings)
+                    : new FileLogViewerService(settings, hostEnvironment);
+            });
             return services;
         }
     }

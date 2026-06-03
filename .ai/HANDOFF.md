@@ -13,7 +13,7 @@ tags:
 
 ## Current Focus
 
-Serilog.AspNetCore dependency was pinned back to 9.0.x and shipped in EzLib NuGet package `1.0.19`.
+Log Viewer nested config key and relative path handling are being fixed for EzLib NuGet package `1.0.20`.
 
 ## What Changed Recently
 
@@ -51,7 +51,7 @@ Serilog.AspNetCore dependency was pinned back to 9.0.x and shipped in EzLib NuGe
 
 ## Next Best Action
 
-No immediate next action. `EzLib.dotnet8.Tools` version `1.0.19` is published and indexed.
+Publish NuGet package `EzLib.dotnet8.Tools` version `1.0.20`.
 
 ## Watchouts
 
@@ -83,3 +83,9 @@ No immediate next action. `EzLib.dotnet8.Tools` version `1.0.19` is published an
 - `nuget pack .\EzLib.nuspec -OutputDirectory $env:TEMP\EzLibPackCheck-1.0.19` produced `EzLib.dotnet8.Tools.1.0.19.nupkg`; package inspection confirmed `Serilog.AspNetCore` dependency version `9.0.0`.
 - `nuget push` returned `Your package was pushed` for `EzLib.dotnet8.Tools.1.0.19.nupkg`.
 - `https://www.nuget.org/packages/EzLib.dotnet8.Tools/1.0.19` returned HTTP 200 and flat-container index included `1.0.19`.
+- 2026-06-03 Log Viewer fix: `AddLogViewer(configuration, "PxApi:LogDirectory")` now supports nested appsettings keys that resolve to absolute paths or relative paths under the host `ContentRootPath`.
+- Default `LogViewerSettings.FileSearchPattern` changed from `*.txt` to `*.*` so `.log` files are listed without extra configuration.
+- `dotnet test .\EzLib.Tests\EzLib.Tests.csproj -v minimal` passed on 2026-06-03 with 18 tests after the nested key/content-root fix.
+- `dotnet build .\EzLib.csproj -c Release -v minimal` passed on 2026-06-03 with existing `SmsService` nullable warnings after the nested key/content-root fix.
+- Temporary ASP.NET Core smoke host used `PxApi:LogDirectory = logs`, created `logs/app.log`, and `/logs/api/files` returned `app.log`.
+- `nuget pack .\EzLib.nuspec -OutputDirectory $env:TEMP\EzLibPackCheck-1.0.20` produced `EzLib.dotnet8.Tools.1.0.20.nupkg`.
