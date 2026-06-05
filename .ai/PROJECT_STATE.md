@@ -3,7 +3,7 @@ title: EzLib Project State
 type: project-state
 status: active
 project: Ezsoft4u-EzLib.dotnet8.Tools
-updated: 2026-06-03
+updated: 2026-06-05
 tags:
   - ai-team
   - project-state
@@ -34,6 +34,8 @@ Shared .NET 8 utility library for Ezsoft4u projects.
 - [x] Published NuGet package `EzLib.dotnet8.Tools` version `1.0.19`.
 - [x] Fixed Log Viewer nested config key, host ContentRoot-relative path resolution, and default `.log` file listing for the next package.
 - [x] Published NuGet package `EzLib.dotnet8.Tools` version `1.0.20`.
+- [x] Aligned dependency metadata for `Azure.Identity` `1.17.2`, `Microsoft.Data.SqlClient` `6.1.5`, and `Microsoft.Data.Sqlite` `9.0.16`.
+- [x] Published NuGet package `EzLib.dotnet8.Tools` version `1.0.21`.
 
 ## Doing
 
@@ -73,6 +75,12 @@ dotnet build EzLib.sln
 - `dotnet test .\EzLib.Tests\EzLib.Tests.csproj -v minimal` passed on 2026-06-03 with 17 tests.
 - `dotnet build .\EzLib.csproj -c Release -v minimal` passed on 2026-06-03 with existing `SmsService` nullable warnings.
 - 2026-06-03 smoke test: temporary ASP.NET Core net8.0 host referenced local EzLib, configured only `"SystemLogDirectory": "system-logs"`, served `/logs`, `/logs/api/files`, and `/logs/api/content`; Playwright browser UI loaded and date-range query returned the expected error log plus stack trace.
+- `dotnet restore .\EzLib.csproj -v minimal` passed on 2026-06-05.
+- `dotnet build .\EzLib.csproj -c Release -v minimal` passed on 2026-06-05 with existing `SmsService` nullable warnings.
+- `dotnet test .\EzLib.Tests\EzLib.Tests.csproj -v minimal` passed on 2026-06-05 with 18 tests.
+- `nuget pack .\EzLib.nuspec -OutputDirectory $env:TEMP\EzLibPackCheck-1.0.21` produced `EzLib.dotnet8.Tools.1.0.21.nupkg`; package inspection confirmed dependency metadata for `Azure.Identity` `1.17.2`, `Microsoft.Data.SqlClient` `6.1.5`, and `Microsoft.Data.Sqlite` `9.0.16`.
+- `nuget push` returned `Your package was pushed` for `EzLib.dotnet8.Tools.1.0.21.nupkg`.
+- `https://www.nuget.org/packages/EzLib.dotnet8.Tools/1.0.21` returned HTTP 200 and flat-container index included `1.0.21`.
 
 ## Follow-up Changes
 
@@ -88,6 +96,8 @@ dotnet build EzLib.sln
 - 2026-06-03: `nuget push` for `EzLib.dotnet8.Tools.1.0.19.nupkg` succeeded; NuGet version page returned HTTP 200 and flat-container index included `1.0.19`.
 - 2026-06-03: Package metadata bumped to `1.0.20`; Log Viewer relative directories now resolve from host `ContentRootPath`, default file pattern is `*.*`, and docs show nested keys such as `PxApi:LogDirectory`.
 - 2026-06-03: `nuget push` for `EzLib.dotnet8.Tools.1.0.20.nupkg` succeeded; NuGet version page returned HTTP 200 and flat-container index included `1.0.20`.
+- 2026-06-05: Package metadata bumped to `1.0.21`; nuspec dependencies now match the project references for `Azure.Identity` `1.17.2`, `Microsoft.Data.SqlClient` `6.1.5`, and `Microsoft.Data.Sqlite` `9.0.16`.
+- 2026-06-05: `nuget push` for `EzLib.dotnet8.Tools.1.0.21.nupkg` succeeded; NuGet version page returned HTTP 200 and flat-container index included `1.0.21`.
 
 ## Notes For Cloud Agents
 

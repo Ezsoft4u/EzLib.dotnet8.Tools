@@ -3,7 +3,7 @@ title: EzLib Handoff
 type: handoff
 status: active
 project: Ezsoft4u-EzLib.dotnet8.Tools
-updated: 2026-06-03
+updated: 2026-06-05
 tags:
   - ai-team
   - handoff
@@ -13,7 +13,7 @@ tags:
 
 ## Current Focus
 
-Log Viewer nested config key and relative path handling shipped in EzLib NuGet package `1.0.20`.
+Dependency metadata alignment shipped in EzLib NuGet package `1.0.21`.
 
 ## What Changed Recently
 
@@ -48,10 +48,17 @@ Log Viewer nested config key and relative path handling shipped in EzLib NuGet p
   - `Services/Interfaces/IMailService.cs`
   - `Services/MailService.cs`
   - `SmtpMailer.cs`
+- 2026-06-05 dependency alignment:
+  - `Azure.Identity` changed to `1.17.2`.
+  - `Microsoft.Data.SqlClient` changed to `6.1.5`.
+  - `Microsoft.Data.Sqlite` changed to `9.0.16`.
+  - `EzLib.csproj` and `EzLib.nuspec` package version bumped to `1.0.21`.
+  - Commit `d013198 chore: align package dependency versions` pushed to `main`.
+  - NuGet package `EzLib.dotnet8.Tools` version `1.0.21` published and indexed.
 
 ## Next Best Action
 
-No immediate next action. `EzLib.dotnet8.Tools` version `1.0.20` is published and indexed.
+No immediate next action. `EzLib.dotnet8.Tools` version `1.0.21` is published and indexed.
 
 ## Watchouts
 
@@ -91,3 +98,9 @@ No immediate next action. `EzLib.dotnet8.Tools` version `1.0.20` is published an
 - `nuget pack .\EzLib.nuspec -OutputDirectory $env:TEMP\EzLibPackCheck-1.0.20` produced `EzLib.dotnet8.Tools.1.0.20.nupkg`.
 - `nuget push` returned `Your package was pushed` for `EzLib.dotnet8.Tools.1.0.20.nupkg`.
 - `https://www.nuget.org/packages/EzLib.dotnet8.Tools/1.0.20` returned HTTP 200 and flat-container index included `1.0.20`.
+- 2026-06-05: `dotnet restore .\EzLib.csproj -v minimal` passed.
+- 2026-06-05: `dotnet build .\EzLib.csproj -c Release -v minimal` passed with existing `SmsService` nullable warnings.
+- 2026-06-05: `dotnet test .\EzLib.Tests\EzLib.Tests.csproj -v minimal` passed with 18 tests.
+- 2026-06-05: `nuget pack .\EzLib.nuspec -OutputDirectory $env:TEMP\EzLibPackCheck-1.0.21` produced `EzLib.dotnet8.Tools.1.0.21.nupkg`, and inspected metadata showed the aligned dependency versions.
+- 2026-06-05: `nuget push` returned `Your package was pushed` for `EzLib.dotnet8.Tools.1.0.21.nupkg`.
+- 2026-06-05: `https://www.nuget.org/packages/EzLib.dotnet8.Tools/1.0.21` returned HTTP 200 and flat-container index included `1.0.21`.
