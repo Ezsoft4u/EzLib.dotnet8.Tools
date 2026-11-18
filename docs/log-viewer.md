@@ -74,6 +74,7 @@ app.UseLogViewer();
 
 - 左側列出多個 log 檔，依最後修改時間由新到舊排序。
 - 可選擇指定檔案查詢。
+- 工具列「下載 ZIP」將目前選取的完整原始 log 壓縮後下載；ZIP 內保留原始檔名與內容，不受日期篩選或行數限制影響。
 - 支援日期時間起迄查詢；Serilog 預設格式的多行 exception stack trace 會跟著同一筆 log 一起顯示。
 - 預設每 5 秒重新讀取目前檔案，方便即時看錯誤訊息。
 - 預設檔名樣式為 `*.*`，可列出 `.log`、`.txt` 或其他宿主專案輸出的 log 檔。
@@ -85,6 +86,7 @@ app.UseLogViewer();
 |---|---|
 | `GET /logs` | Log Viewer HTML UI |
 | `GET /logs/api/files` | 回傳可選擇的 log 檔清單 |
+| `GET /logs/api/download?file=log-20260603.txt` | 下載 `log-20260603.txt.zip`，內含完整原始 log，沿用 Viewer Key 驗證 |
 | `GET /logs/api/content?file=log-20260603.txt&from=2026-06-03T00:00:00Z&to=2026-06-03T23:59:59Z&tailLines=500` | 讀取指定 log 檔內容 |
 
 啟用 `RequireViewerKey` 後，每個請求須帶：

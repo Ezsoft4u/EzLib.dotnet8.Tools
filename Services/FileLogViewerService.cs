@@ -105,6 +105,18 @@ namespace EzLib.Services
             };
         }
 
+        /// <summary>
+        /// 驗證檔名後開啟原始檔，允許記錄程序繼續寫入及輪替。
+        /// </summary>
+        public Task<Stream> OpenLogFileAsync(string fileName, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var path = ResolveLogFilePath(fileName);
+            Stream stream = new FileStream(path, FileMode.Open, FileAccess.Read,
+                FileShare.ReadWrite | FileShare.Delete, 81920, FileOptions.Asynchronous | FileOptions.SequentialScan);
+            return Task.FromResult(stream);
+        }
+
         private static string ResolveLogDirectory(string configuredDirectory, string? contentRootPath)
         {
             var directory = string.IsNullOrWhiteSpace(configuredDirectory)

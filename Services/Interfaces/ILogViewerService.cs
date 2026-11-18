@@ -16,5 +16,10 @@ namespace EzLib.Services
         /// 依檔名與時間區間讀取 log 內容。
         /// </summary>
         Task<LogReadResult> ReadLogFileAsync(LogReadRequest request, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 開啟原始 log 檔供下載，呼叫端負責釋放串流。
+        /// </summary>
+        Task<Stream> OpenLogFileAsync(string fileName, CancellationToken cancellationToken = default);
     }
 }

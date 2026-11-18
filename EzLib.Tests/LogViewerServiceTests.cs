@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using System.Text;
+using System.IO.Compression;
 using Xunit;
 
 namespace EzLib.Tests;
@@ -204,6 +205,92 @@ public class LogViewerServiceTests : IDisposable
         var files = await service.ListLogFilesAsync();
 
         Assert.Contains(files, file => file.Name == "direct-20260603.txt");
+    }
+
+    // ZIP 內應保留原始位元組、完整內容及中文檔名，且不阻擋寫入中的 log。
+    [Fact]
+    public async Task LogViewerMiddleware_downloads_original_file_while_writer_is_open()
+    {
+        const string fileName = "系統 log.txt";
+        var bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes("first\r\nsecond\n最後一行")).ToArray();
+        var path = Path.Combine(_tempDirectory, fileName);
+        await File.WriteAllBytesAsync(path, bytes);
+        await using var writer = new FileStream(path, FileMode.Open, FileAccess.Write, FileShare.ReadWrite);
+        var settings = CreateSettings();
+        settings.DefaultTailLines = 1;
+        settings.ViewerPath = "/custom-logs";
+        var middleware = new LogViewerMiddleware(_ => Task.CompletedTask, settings, new FileLogViewerService(settings));
+        var context = new DefaultHttpContext();
+        context.Request.Path = "/custom-logs/api/download";
+        context.Request.QueryString = QueryString.Create(new Dictionary<string, string?>
+        {
+            ["file"] = fileName,
+            ["tailLines"] = "1",
+            ["from"] = "2099-01-01T00:00:00Z"
+        });
+        var body = new MemoryStream();
+        context.Response.Body = body;
+
+        await middleware.InvokeAsync(context);
+
+        Assert.Equal(StatusCodes.Status200OK, context.Response.StatusCode);
+        Assert.Equal("application/zip", context.Response.ContentType);
+        var disposition = Microsoft.Net.Http.Headers.ContentDispositionHeaderValue.Parse(context.Response.Headers.ContentDisposition.ToString());
+        Assert.Equal("attachment", disposition.DispositionType.ToString());
+        Assert.Equal(fileName + ".zip", disposition.FileNameStar.ToString());
+        Assert.Equal(body.Length, context.Response.ContentLength);
+        body.Position = 0;
+        using var archive = new ZipArchive(body, ZipArchiveMode.Read);
+        var entry = Assert.Single(archive.Entries);
+        Assert.Equal(fileName, entry.FullName);
+        await using var entryStream = entry.Open();
+        using var extracted = new MemoryStream();
+        await entryStream.CopyToAsync(extracted);
+        Assert.Equal(bytes, extracted.ToArray());
+    }
+
+    // 無效檔名與不存在的檔案應回傳明確錯誤，不傳送附件。
+    [Theory]
+    [InlineData("", 400)]
+    [InlineData("../secret.txt", 400)]
+    [InlineData("..\\secret.txt", 400)]
+    [InlineData("missing.txt", 404)]
+    public async Task LogViewerMiddleware_rejects_invalid_downloads(string fileName, int expectedStatus)
+    {
+        var settings = CreateSettings();
+        var middleware = new LogViewerMiddleware(_ => Task.CompletedTask, settings, new FileLogViewerService(settings));
+        var context = new DefaultHttpContext();
+        context.Request.Path = "/logs/api/download";
+        context.Request.QueryString = QueryString.Create("file", fileName);
+        context.Response.Body = new MemoryStream();
+
+        await middleware.InvokeAsync(context);
+
+        Assert.Equal(expectedStatus, context.Response.StatusCode);
+        Assert.Empty(context.Response.Headers.ContentDisposition.ToString());
+    }
+
+    // 下載端點必須與其他 Log Viewer API 使用相同的存取驗證。
+    [Theory]
+    [InlineData(null, 401)]
+    [InlineData("wrong-key", 401)]
+    [InlineData("test-viewer-key", 200)]
+    public async Task LogViewerMiddleware_download_requires_viewer_key(string? key, int expectedStatus)
+    {
+        await File.WriteAllTextAsync(Path.Combine(_tempDirectory, "app.txt"), "log content");
+        var settings = CreateSettings();
+        settings.RequireViewerKey = true;
+        settings.ViewerKey = "test-viewer-key";
+        var middleware = new LogViewerMiddleware(_ => Task.CompletedTask, settings, new FileLogViewerService(settings));
+        var context = new DefaultHttpContext();
+        context.Request.Path = "/logs/api/download";
+        context.Request.QueryString = QueryString.Create("file", "app.txt");
+        if (key != null) context.Request.Headers["X-Log-Viewer-Key"] = key;
+        context.Response.Body = new MemoryStream();
+
+        await middleware.InvokeAsync(context);
+
+        Assert.Equal(expectedStatus, context.Response.StatusCode);
     }
 
     public void Dispose()

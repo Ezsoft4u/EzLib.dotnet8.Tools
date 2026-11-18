@@ -1,0 +1,72 @@
+name: Publish NuGet
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-nuget
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event_name == 'push' || github.ref == 'refs/heads/main'
+    runs-on: windows-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - uses: NuGet/setup-nuget@v2
+
+      - name: Validate package version
+        shell: pwsh
+        run: |
+          [xml]$project = Get-Content EzLib.csproj -Raw
+          [xml]$spec = Get-Content EzLib.nuspec -Raw
+          $version = $spec.package.metadata.version
+          if ($project.Project.PropertyGroup.Version -ne $version) {
+            throw 'EzLib.csproj and EzLib.nuspec versions must match.'
+          }
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -ne "v$version") {
+            throw "The release tag must be v$version."
+          }
+
+      - name: Build and test Release
+        run: dotnet test EzLib.Tests/EzLib.Tests.csproj --configuration Release --verbosity minimal
+
+      - name: Pack NuGet
+        run: nuget pack EzLib.nuspec -OutputDirectory artifacts -NonInteractive
+
+      - name: Save package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-package
+          path: artifacts/*.nupkg
+          if-no-files-found: error
+
+      - name: NuGet login with OIDC
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      - name: Publish to nuget.org
+        shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: |
+          $package = Get-ChildItem artifacts/*.nupkg
+          if (@($package).Count -ne 1) { throw 'Expected exactly one NuGet package.' }
+          dotnet nuget push $package.FullName --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json

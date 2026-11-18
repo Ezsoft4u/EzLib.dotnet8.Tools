@@ -119,6 +119,7 @@ Console.WriteLine(rtn.IsSuccess ? $"成功 ID={rtn.MessageId}" : $"失敗: {rtn.
 ### SmsResult 欄位
 | 屬性 | 說明 |
 |------|------|
+| 1.0.22 | Log Viewer 新增「下載 ZIP」，內含選取 log 的完整原始內容與檔名。 |
 | IsSuccess | 是否成功 |
 | Message | 平台或錯誤訊息 |
 | MessageId | 成功回傳訊息 ID |

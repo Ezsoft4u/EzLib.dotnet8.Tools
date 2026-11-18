@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.IO.Compression;
 using EzLib.Models;
 using EzLib.Services;
 using Microsoft.AspNetCore.Http;
@@ -71,6 +72,12 @@ namespace EzLib.Middleware
                 return;
             }
 
+            if (subPath.Equals("api/download", StringComparison.OrdinalIgnoreCase))
+            {
+                await HandleDownloadApiAsync(context);
+                return;
+            }
+
             await _next(context);
         }
 
@@ -119,6 +126,47 @@ namespace EzLib.Middleware
             }
         }
 
+        /// <summary>
+        /// 將完整 log 壓成暫存 ZIP 後下載，結束時自動清除暫存檔。
+        /// </summary>
+        private async Task HandleDownloadApiAsync(HttpContext context)
+        {
+            try
+            {
+                var fileName = context.Request.Query["file"].FirstOrDefault() ?? string.Empty;
+                await using var stream = await _logViewer.OpenLogFileAsync(fileName, context.RequestAborted);
+                await using var zipStream = new FileStream(
+                    Path.Combine(Path.GetTempPath(), $"ezlib-log-{Guid.NewGuid():N}.zip"),
+                    FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 81920,
+                    FileOptions.Asynchronous | FileOptions.DeleteOnClose);
+                using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, leaveOpen: true))
+                {
+                    var entry = archive.CreateEntry(fileName, CompressionLevel.Fastest);
+                    await using var entryStream = entry.Open();
+                    await stream.CopyToAsync(entryStream, context.RequestAborted);
+                }
+                zipStream.Position = 0;
+                var disposition = new Microsoft.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
+                disposition.SetHttpFileName(fileName + ".zip");
+                context.Response.ContentType = "application/zip";
+                context.Response.ContentLength = zipStream.Length;
+                context.Response.Headers.ContentDisposition = disposition.ToString();
+                await zipStream.CopyToAsync(context.Response.Body, context.RequestAborted);
+            }
+            catch (FileNotFoundException ex) when (!context.Response.HasStarted)
+            {
+                await WriteErrorAsync(context, StatusCodes.Status404NotFound, ex.Message);
+            }
+            catch (DirectoryNotFoundException ex) when (!context.Response.HasStarted)
+            {
+                await WriteErrorAsync(context, StatusCodes.Status404NotFound, ex.Message);
+            }
+            catch (InvalidOperationException ex) when (!context.Response.HasStarted)
+            {
+                await WriteErrorAsync(context, StatusCodes.Status400BadRequest, ex.Message);
+            }
+        }
+
         private bool ValidateViewerKey(HttpContext context)
         {
             if (!_settings.RequireViewerKey)
@@ -159,6 +207,7 @@ namespace EzLib.Middleware
             await WriteJsonAsync(context, new { error = message });
         }
 
+        // 建立含 ZIP 下載操作的 Log Viewer 畫面。
         private static string BuildViewerHtml(string basePath)
         {
             return $@"<!DOCTYPE html>
@@ -184,6 +233,7 @@ label{{font-size:12px;color:#94a3b8}}
 input{{background:#0b1220;border:1px solid #334155;color:#e5e7eb;border-radius:6px;padding:6px 8px;font-size:13px}}
 button{{background:#1f2937;border:1px solid #334155;color:#e5e7eb;border-radius:6px;padding:7px 12px;cursor:pointer;font-size:13px}}
 button:hover{{background:#263244}}
+button:disabled{{opacity:.5;cursor:default}}
 .check{{display:flex;align-items:center;gap:6px;margin-left:auto}}
 .check input{{width:16px;height:16px}}
 #status{{color:#94a3b8;font-size:12px;padding:0 14px;height:28px;display:flex;align-items:center;border-bottom:1px solid #1f2937}}
@@ -203,6 +253,7 @@ button:hover{{background:#263244}}
     <label>行數</label><input id=""tail"" type=""number"" min=""1"" max=""5000"" value=""500"" style=""width:86px"">
     <button onclick=""loadContent()"">查詢</button>
     <button onclick=""loadFiles()"">重新整理</button>
+    <button id=""download"" onclick=""downloadFile()"" disabled>下載 ZIP</button>
     <label class=""check""><input id=""auto"" type=""checkbox"" checked>即時</label>
   </div>
   <div id=""status"">尚未載入</div>
@@ -223,11 +274,14 @@ function toIso(value) {{
   return value ? new Date(value).toISOString() : '';
 }}
 
+// 更新檔案清單，沒有可選檔案時停用下載。
 async function loadFiles() {{
   const response = await fetch(BASE + '/api/files');
   const files = await response.json();
   const list = document.getElementById('files');
   if (!files.length) {{
+    selectedFile = null;
+    document.getElementById('download').disabled = true;
     list.innerHTML = '<div style=""padding:16px;color:#94a3b8;font-size:13px"">沒有 log 檔</div>';
     document.getElementById('content').textContent = '';
     document.getElementById('status').textContent = '沒有 log 檔';
@@ -245,13 +299,26 @@ async function loadFiles() {{
   }}
 }}
 
+// 選取檔案並啟用 ZIP 下載。
 function selectFile(encodedName) {{
   selectedFile = decodeURIComponent(encodedName);
+  document.getElementById('download').disabled = false;
   document.querySelectorAll('.file').forEach(button => button.classList.remove('active'));
   for (const button of document.querySelectorAll('.file')) {{
     if (button.textContent.startsWith(selectedFile)) button.classList.add('active');
   }}
   loadContent();
+}}
+
+// 交由瀏覽器下載選取 log 的 ZIP 壓縮檔。
+function downloadFile() {{
+  if (!selectedFile) return;
+  const link = document.createElement('a');
+  link.href = BASE + '/api/download?' + new URLSearchParams({{file: selectedFile}}).toString();
+  link.download = selectedFile + '.zip';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 }}
 
 async function loadContent() {{
