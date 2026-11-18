@@ -1,4 +1,4 @@
-using EzLib.Models;
+ï»¿using EzLib.Models;
 using EzLib.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,16 +7,16 @@ using System;
 namespace EzLib.Extensions
 {
     /// <summary>
-    /// ªA°È¶°¦XÂX®i¤èªk
+    /// æœå‹™é›†åˆæ“´å±•æ–¹æ³•
     /// </summary>
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// ·s¼WÂ²°TªA°È
+        /// æ–°å¢ç°¡è¨Šæœå‹™
         /// </summary>
-        /// <param name="services">ªA°È¶°¦X</param>
-        /// <param name="configureOptions">³]©w¿ï¶µªº©e¬£</param>
-        /// <returns>ªA°È¶°¦X</returns>
+        /// <param name="services">æœå‹™é›†åˆ</param>
+        /// <param name="configureOptions">è¨­å®šé¸é …çš„å§”æ´¾</param>
+        /// <returns>æœå‹™é›†åˆ</returns>
         public static IServiceCollection AddSmsService(
             this IServiceCollection services,
             Action<SmsSettings> configureOptions)
@@ -24,22 +24,22 @@ namespace EzLib.Extensions
             if (services == null) throw new ArgumentNullException(nameof(services));
             if (configureOptions == null) throw new ArgumentNullException(nameof(configureOptions));
 
-            // µù¥U³]©w
+            // è¨»å†Šè¨­å®š
             services.Configure<SmsSettings>(configureOptions);
             
-            // µù¥U HttpClient ©MªA°È
+            // è¨»å†Š HttpClient å’Œæœå‹™
             services.AddHttpClient<ISmsService, SmsService>();
             
             return services;
         }
         
         /// <summary>
-        /// ±q°t¸m·s¼WÂ²°TªA°È
+        /// å¾é…ç½®æ–°å¢ç°¡è¨Šæœå‹™
         /// </summary>
-        /// <param name="services">ªA°È¶°¦X</param>
-        /// <param name="configuration">°t¸m</param>
-        /// <param name="sectionName">°t¸m°Ï¬q¦WºÙ</param>
-        /// <returns>ªA°È¶°¦X</returns>
+        /// <param name="services">æœå‹™é›†åˆ</param>
+        /// <param name="configuration">é…ç½®</param>
+        /// <param name="sectionName">é…ç½®å€æ®µåç¨±</param>
+        /// <returns>æœå‹™é›†åˆ</returns>
         public static IServiceCollection AddSmsService(
             this IServiceCollection services,
             IConfiguration configuration,
@@ -48,10 +48,10 @@ namespace EzLib.Extensions
             if (services == null) throw new ArgumentNullException(nameof(services));
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
-            // ±q°t¸m¤¤¸j©w³]©w
+            // å¾é…ç½®ä¸­ç¶å®šè¨­å®š
             services.Configure<SmsSettings>(configuration.GetSection(sectionName));
             
-            // µù¥U HttpClient ©MªA°È
+            // è¨»å†Š HttpClient å’Œæœå‹™
             services.AddHttpClient<ISmsService, SmsService>();
             
             return services;

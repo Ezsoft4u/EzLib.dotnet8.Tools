@@ -1,4 +1,4 @@
-// SmsService.cs (½d¨Ò¹ê§@¡A¨Ï¥Î HttpClient)
+ï»¿// SmsService.cs (ç¯„ä¾‹å¯¦ä½œï¼Œä½¿ç”¨ HttpClient)
 using EzLib.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -22,38 +22,38 @@ namespace EzLib.Services
         private string _resBodyString = string.Empty;
 
         /// <summary>
-        /// ªì©l¤ÆÂ²°TªA°È
+        /// åˆå§‹åŒ–ç°¡è¨Šæœå‹™
         /// </summary>
-        /// <param name="httpClient">HTTP«È¤áºİ</param>
-        /// <param name="options">Â²°T³]©w¿ï¶µ</param>
+        /// <param name="httpClient">HTTPå®¢æˆ¶ç«¯</param>
+        /// <param name="options">ç°¡è¨Šè¨­å®šé¸é …</param>
         public SmsService(HttpClient httpClient, IOptions<SmsSettings> options)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _smsSettings = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
-            // ½T«O½s½X´£¨ÑªÌ¤wµù¥U
+            // ç¢ºä¿ç·¨ç¢¼æä¾›è€…å·²è¨»å†Š
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         }
 
         /// <summary>
-        /// µo°eÂ²°T
+        /// ç™¼é€ç°¡è¨Š
         /// </summary>
-        /// <param name="phoneNumber">±µ¦¬ªÌ¤â¾÷¸¹½X</param>
-        /// <param name="message">Â²°T¤º®e</param>
-        /// <returns>µo°eµ²ªG</returns>
+        /// <param name="phoneNumber">æ¥æ”¶è€…æ‰‹æ©Ÿè™Ÿç¢¼</param>
+        /// <param name="message">ç°¡è¨Šå…§å®¹</param>
+        /// <returns>ç™¼é€çµæœ</returns>
         public async Task<SmsResult> SendSmsAsync(string phoneNumber, string message)
         {
             try
             {
-                // «Ø¥ß§¹¾ãªº API URL
+                // å»ºç«‹å®Œæ•´çš„ API URL
                 string apiUrl = $"{_smsSettings.ApiServer}:{_smsSettings.ApiPort}{_smsSettings.ApiRoute}";
 
-                // ª½±µ±N¦r¦êÂà´«¬° UTF-16BE ®æ¦¡ªº¦ì¤¸²Õ
+                // ç›´æ¥å°‡å­—ä¸²è½‰æ›ç‚º UTF-16BE æ ¼å¼çš„ä½å…ƒçµ„
                 byte[] utf16beBytes = Encoding.BigEndianUnicode.GetBytes(message);
-                // ±N³o¨Ç¦ì¤¸²ÕÂà´«¬° Hex ¦r¦êªí¥Ü§Î¦¡
+                // å°‡é€™äº›ä½å…ƒçµ„è½‰æ›ç‚º Hex å­—ä¸²è¡¨ç¤ºå½¢å¼
                 string messageuft16be = BitConverter.ToString(utf16beBytes).Replace("-", "");
 
-                // «Ø¥ß x-www-form-urlencoded ®æ¦¡ªº body
+                // å»ºç«‹ x-www-form-urlencoded æ ¼å¼çš„ body
                 var requestBody = new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     { "account", _smsSettings.Username },
@@ -64,14 +64,14 @@ namespace EzLib.Services
                     { "msg", messageuft16be }
                 });
 
-                // °e¥X«e±NrequestBodyÂà´«¬°¦r¦ê¥H«K©ó°£¿ù
+                // é€å‡ºå‰å°‡requestBodyè½‰æ›ç‚ºå­—ä¸²ä»¥ä¾¿æ–¼é™¤éŒ¯
                 _reqBodyString = await requestBody.ReadAsStringAsync();
 
-                _resBodyString = string.Empty; // ²MªÅ¦^À³¤º®e
+                _resBodyString = string.Empty; // æ¸…ç©ºå›æ‡‰å…§å®¹
                 var response = await _httpClient.PostAsync(apiUrl, requestBody);
                 if (response.IsSuccessStatusCode)
                 {
-                    // ±N¦^À³¤º®eÂà´«¬°¦r¦ê¥H«K©ó°£¿ù
+                    // å°‡å›æ‡‰å…§å®¹è½‰æ›ç‚ºå­—ä¸²ä»¥ä¾¿æ–¼é™¤éŒ¯
                     var responseBytes = await response.Content.ReadAsByteArrayAsync();
                     var big5 = CodePagesEncodingProvider.Instance.GetEncoding("big5");
                     _resBodyString = big5.GetString(responseBytes);
@@ -82,7 +82,7 @@ namespace EzLib.Services
                     return new SmsResult
                     {
                         IsSuccess = false,
-                        Message = $"¥~³¡ API ¿ù»~: {response.StatusCode} - {response.ReasonPhrase}",
+                        Message = $"å¤–éƒ¨ API éŒ¯èª¤: {response.StatusCode} - {response.ReasonPhrase}",
                         RequestBody = _reqBodyString,
                         ResponseBody = _resBodyString,
                     };
@@ -93,7 +93,7 @@ namespace EzLib.Services
                 return new SmsResult
                 {
                     IsSuccess = false,
-                    Message = $"¨Ò¥~ª¬ªp: {ex.Message}",
+                    Message = $"ä¾‹å¤–ç‹€æ³: {ex.Message}",
                     RequestBody = _reqBodyString,
                     ResponseBody = _resBodyString,
                 };
@@ -104,7 +104,7 @@ namespace EzLib.Services
         {
             try
             {
-                // ±N <br> ´À´«¬° <br/> ¥H²Å¦X XML ®æ¦¡
+                // å°‡ <br> æ›¿æ›ç‚º <br/> ä»¥ç¬¦åˆ XML æ ¼å¼
                 string fixedContent = responseContent.Replace("<br>", "<br/>");
                 XDocument doc = XDocument.Parse(fixedContent);
                 var body = doc.Descendants("body").FirstOrDefault();
@@ -112,18 +112,18 @@ namespace EzLib.Services
                 if (body != null)
                 {
                     string bodyContent = body.Value.Trim();
-                    // §PÂ_¬O¦¨¥\ÁÙ¬O¥¢±Ñªº¦^À³®æ¦¡
-                    // ¥¢±Ñ¥u·|¦³¤@­Ó'|'
-                    // ¦¨¥\·|¦³¦h­Ó'|'
-                    // ¦¨¥\ªº¦^À³®æ¦¡: {to_addr}|{return code}|{messageid}|{description}
-                    // ¥¢±Ñªº¦^À³®æ¦¡: {return code}|{description}
-                    // ¸ÑªR¦^À³¤º®e
+                    // åˆ¤æ–·æ˜¯æˆåŠŸé‚„æ˜¯å¤±æ•—çš„å›æ‡‰æ ¼å¼
+                    // å¤±æ•—åªæœƒæœ‰ä¸€å€‹'|'
+                    // æˆåŠŸæœƒæœ‰å¤šå€‹'|'
+                    // æˆåŠŸçš„å›æ‡‰æ ¼å¼: {to_addr}|{return code}|{messageid}|{description}
+                    // å¤±æ•—çš„å›æ‡‰æ ¼å¼: {return code}|{description}
+                    // è§£æå›æ‡‰å…§å®¹
                     if (string.IsNullOrEmpty(bodyContent))
                     {
                         return new SmsResult
                         {
                             IsSuccess = false,
-                            Message = "¦^À³¤º®e body ¬°ªÅ",
+                            Message = "å›æ‡‰å…§å®¹ body ç‚ºç©º",
                             RequestBody = _reqBodyString,
                             ResponseBody = _resBodyString,
                         };
@@ -131,7 +131,7 @@ namespace EzLib.Services
 
                     if (bodyContent.Split('|').Length > 2)
                     {
-                        // ¦¨¥\ªº¦^À³®æ¦¡
+                        // æˆåŠŸçš„å›æ‡‰æ ¼å¼
                         /*
                             <html>
                             <header>
@@ -145,7 +145,7 @@ namespace EzLib.Services
                     }
                     else
                     {
-                        // ¥¢±Ñªº¦^À³®æ¦¡
+                        // å¤±æ•—çš„å›æ‡‰æ ¼å¼
                         // {return code}|{description}
                         return ParseFailureResponse(bodyContent);
                     }
@@ -155,7 +155,7 @@ namespace EzLib.Services
                     return new SmsResult
                     {
                         IsSuccess = false,
-                        Message = "¦^À³¤º®e body ¬°ªÅ",
+                        Message = "å›æ‡‰å…§å®¹ body ç‚ºç©º",
                         RequestBody = _reqBodyString,
                         ResponseBody = _resBodyString,
                     };
@@ -166,7 +166,7 @@ namespace EzLib.Services
                 return new SmsResult
                 {
                     IsSuccess = false,
-                    Message = $"¸ÑªR¦^À³¤º®e®Éµo¥Í¿ù»~: {ex.Message}",
+                    Message = $"è§£æå›æ‡‰å…§å®¹æ™‚ç™¼ç”ŸéŒ¯èª¤: {ex.Message}",
                     RequestBody = _reqBodyString,
                     ResponseBody = _resBodyString,
 
@@ -191,21 +191,21 @@ namespace EzLib.Services
                     string messageId = values[2];
                     string description = values[3];
 
-                    if (returnCode != "0") // °²³] returnCode 0 ¥Nªí¦¨¥\
+                    if (returnCode != "0") // å‡è¨­ returnCode 0 ä»£è¡¨æˆåŠŸ
                     {
                         allSuccess = false;
-                        messages.AppendLine($"µo°e¦Ü {toAddr} ¥¢±Ñ: {description} (Return Code: {returnCode})");
+                        messages.AppendLine($"ç™¼é€è‡³ {toAddr} å¤±æ•—: {description} (Return Code: {returnCode})");
                     }
                     else
                     {
                         messageIds.Add(messageId);
-                        messages.AppendLine($"µo°e¦Ü {toAddr} ¦¨¥\¡A°T®§ ID: {messageId}");
+                        messages.AppendLine($"ç™¼é€è‡³ {toAddr} æˆåŠŸï¼Œè¨Šæ¯ ID: {messageId}");
                     }
                 }
                 else
                 {
                     allSuccess = false;
-                    messages.AppendLine($"µLªk¸ÑªRªº¦^À³: {part}");
+                    messages.AppendLine($"ç„¡æ³•è§£æçš„å›æ‡‰: {part}");
                 }
             }
 
@@ -230,7 +230,7 @@ namespace EzLib.Services
                 return new SmsResult
                 {
                     IsSuccess = false,
-                    Message = $"µo°e¥¢±Ñ: {description} (Return Code: {returnCode})",
+                    Message = $"ç™¼é€å¤±æ•—: {description} (Return Code: {returnCode})",
                     RequestBody = _reqBodyString,
                     ResponseBody = _resBodyString,
                 };
@@ -240,7 +240,7 @@ namespace EzLib.Services
                 return new SmsResult
                 {
                     IsSuccess = false,
-                    Message = $"µLªk¸ÑªRªº¦^À³: {bodyContent}",
+                    Message = $"ç„¡æ³•è§£æçš„å›æ‡‰: {bodyContent}",
                     RequestBody = _reqBodyString,
                     ResponseBody = _resBodyString,
                 };

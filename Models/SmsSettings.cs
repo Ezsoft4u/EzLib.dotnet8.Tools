@@ -1,8 +1,8 @@
-// Models/SmsSettings.cs
+ï»¿// Models/SmsSettings.cs
 namespace EzLib.Models
 {
     /// <summary>
-    /// Â²°TªA°È³]©w
+    /// ç°¡è¨Šæœå‹™è¨­å®š
     /// </summary>
     /// <remarks>
     /// "SmsSettings": {
@@ -17,32 +17,32 @@ namespace EzLib.Models
     public class SmsSettings
     {
         /// <summary>
-        /// API ¦øªA¾¹¦ì§}
+        /// API ä¼ºæœå™¨ä½å€
         /// </summary>
         public string? ApiServer { get; set; }
 
         /// <summary>
-        /// API °ğ¸¹
+        /// API åŸ è™Ÿ
         /// </summary>
         public int ApiPort { get; set; }
 
         /// <summary>
-        /// API ¸ô¥Ñ
+        /// API è·¯ç”±
         /// </summary>
         public string? ApiRoute { get; set; }
 
         /// <summary>
-        /// ±H¥óªÌ¸¹½X
+        /// å¯„ä»¶è€…è™Ÿç¢¼
         /// </summary>
         public string? SenderNumber { get; set; }
 
         /// <summary>
-        /// ¨Ï¥ÎªÌ¦WºÙ
+        /// ä½¿ç”¨è€…åç¨±
         /// </summary>
         public string? Username { get; set; }
 
         /// <summary>
-        /// ±K½X
+        /// å¯†ç¢¼
         /// </summary>
         public string? Password { get; set; }
     }

@@ -1,19 +1,19 @@
-// ISmsService.cs
+ï»¿// ISmsService.cs
 using EzLib.Models;
 
 namespace EzLib.Services
 {
     /// <summary>
-    /// Â²°TªA°È¤¶­±
+    /// ç°¡è¨Šæœå‹™ä»‹é¢
     /// </summary>
     public interface ISmsService
     {
         /// <summary>
-        /// µo°eÂ²°T
+        /// ç™¼é€ç°¡è¨Š
         /// </summary>
-        /// <param name="phoneNumber">±µ¦¬ªÌ¤â¾÷¸¹½X</param>
-        /// <param name="message">Â²°T¤º®e</param>
-        /// <returns>µo°eµ²ªG</returns>
+        /// <param name="phoneNumber">æ¥æ”¶è€…æ‰‹æ©Ÿè™Ÿç¢¼</param>
+        /// <param name="message">ç°¡è¨Šå…§å®¹</param>
+        /// <returns>ç™¼é€çµæœ</returns>
         Task<SmsResult> SendSmsAsync(string phoneNumber, string message);
     }
 }
